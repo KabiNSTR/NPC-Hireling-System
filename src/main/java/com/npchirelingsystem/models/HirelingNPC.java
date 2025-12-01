@@ -33,6 +33,7 @@ public class HirelingNPC {
     private int skillPoints = 0;
     private int dropRateUpgrade = 0; // Each point = +5% chance
     private int rareDropUpgrade = 0; // Each point = +1% rare chance
+    private int specialSkillLevel = 0; // Profession specific skill
 
     public HirelingNPC(UUID ownerId, String name, String profession, double wage) {
         this.ownerId = ownerId;
@@ -89,6 +90,21 @@ public class HirelingNPC {
         upgrade.setItemMeta(upgradeMeta);
         inventory.setItem(20, upgrade);
         
+        // Special Skill Button
+        ItemStack special = new ItemStack(Material.ENCHANTED_BOOK);
+        ItemMeta specialMeta = special.getItemMeta();
+        specialMeta.setDisplayName("§6Special: " + getSpecialSkillName());
+        specialMeta.setLore(Arrays.asList(
+            "§7Level: §e" + specialSkillLevel,
+            "§7Cost: §b1 Skill Point",
+            "§7Effect: Increases effectiveness of",
+            "§7" + getSpecialSkillName() + " ability.",
+            "",
+            "§eClick to Upgrade!"
+        ));
+        special.setItemMeta(specialMeta);
+        inventory.setItem(18, special);
+        
         // Fire Button
         ItemStack fire = new ItemStack(Material.RED_WOOL);
         ItemMeta fireMeta = fire.getItemMeta();
@@ -136,6 +152,22 @@ public class HirelingNPC {
     
     public int getRareDropUpgrade() { return rareDropUpgrade; }
     public void setRareDropUpgrade(int rareDropUpgrade) { this.rareDropUpgrade = rareDropUpgrade; }
+    
+    public int getSpecialSkillLevel() { return specialSkillLevel; }
+    public void setSpecialSkillLevel(int level) { this.specialSkillLevel = level; }
+    public void upgradeSpecialSkill() { specialSkillLevel++; }
+    
+    public String getSpecialSkillName() {
+        switch (profession.toLowerCase()) {
+            case "miner": return "Deep Mining";
+            case "lumberjack": return "Sharp Axe";
+            case "farmer": return "Green Thumb";
+            case "hunter": return "Tracker";
+            case "guard": return "Strength";
+            case "fisherman": return "Lure";
+            default: return "Special Ability";
+        }
+    }
     
     public void upgradeDropRate() { dropRateUpgrade++; }
     public void upgradeRareDrop() { rareDropUpgrade++; }

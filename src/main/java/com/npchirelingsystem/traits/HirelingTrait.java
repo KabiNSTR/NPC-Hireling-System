@@ -8,9 +8,14 @@ import net.citizensnpcs.api.trait.TraitName;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 @TraitName("hirelingtrait")
 public class HirelingTrait extends Trait {
@@ -41,7 +46,16 @@ public class HirelingTrait extends Trait {
             // Calculate chance: Base 50% + 5% per upgrade
             int chance = 50 + (hireling.getDropRateUpgrade() * 5);
             if (java.util.concurrent.ThreadLocalRandom.current().nextInt(100) < chance) {
-                ItemStack item = new ItemStack(mat, 1);
+                // Special Skill: Double Drop
+                int amount = 1;
+                if (hireling.getSpecialSkillLevel() > 0) {
+                    // 10% chance per level to double drop
+                    if (java.util.concurrent.ThreadLocalRandom.current().nextInt(100) < (hireling.getSpecialSkillLevel() * 10)) {
+                        amount = 2;
+                    }
+                }
+                
+                ItemStack item = new ItemStack(mat, amount);
                 
                 // Rare drop check
                 if (hireling.getRareDropUpgrade() > 0) {
@@ -55,7 +69,7 @@ public class HirelingTrait extends Trait {
                 
                 Player owner = Bukkit.getPlayer(hireling.getOwnerId());
                 if (owner != null && owner.isOnline()) {
-                    owner.sendMessage("§a[NPC] " + hireling.getName() + " found " + item.getType().name() + "!");
+                    owner.sendMessage("§a[NPC] " + hireling.getName() + " found " + amount + "x " + item.getType().name() + "!");
                 }
             }
         }
@@ -67,6 +81,11 @@ public class HirelingTrait extends Trait {
         if (!this.getNPC().isSpawned()) return;
 
         tickCounter++;
+        
+        // Guard Combat Logic (Every 20 ticks)
+        if (tickCounter % 20 == 0 && hireling.getProfession().equalsIgnoreCase("guard")) {
+            handleGuardCombat();
+        }
 
         // AI Logic: Follow Owner
         if (hireling.isFollowing()) {
@@ -113,6 +132,40 @@ public class HirelingTrait extends Trait {
                 if (nearest != null) {
                     this.getNPC().faceLocation(nearest.getLocation());
                 }
+            }
+        }
+    }
+    
+    private void handleGuardCombat() {
+        if (!this.getNPC().isSpawned()) return;
+        
+        // Scan for monsters within 10 blocks
+        double range = 10.0;
+        // Special Skill: Strength increases range
+        if (hireling.getSpecialSkillLevel() > 0) {
+            range += hireling.getSpecialSkillLevel() * 2;
+        }
+        
+        Entity target = null;
+        double closestDist = range * range;
+        
+        for (Entity e : this.getNPC().getEntity().getNearbyEntities(range, range, range)) {
+            if (e instanceof Monster) {
+                double dist = e.getLocation().distanceSquared(this.getNPC().getEntity().getLocation());
+                if (dist < closestDist) {
+                    closestDist = dist;
+                    target = e;
+                }
+            }
+        }
+        
+        if (target != null) {
+            this.getNPC().getNavigator().setTarget(target, true);
+            
+            // Apply Strength Effect if level is high enough
+            if (hireling.getSpecialSkillLevel() >= 3) {
+                LivingEntity entity = (LivingEntity) this.getNPC().getEntity();
+                entity.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 40, 0));
             }
         }
     }

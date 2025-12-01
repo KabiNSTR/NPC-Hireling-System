@@ -36,3 +36,10 @@
 - [x] Fix Data Persistence (Ensure Traits link to HirelingNPC on load)
 - [x] Remove obsolete `JobTask` and `LootTask` (Refactored into Trait)
 - [x] Update Version to 2.9
+
+## v3.0 Major Update (Combat & Specialization)
+- [x] Implement Profession-Specific Skills (Data & GUI)
+- [x] Implement Guard Combat AI (Targeting Monsters)
+- [x] Implement Special Abilities (Double Drops, Strength Buff)
+- [x] Update Data Persistence for Special Skills
+- [x] Update Version to 3.0

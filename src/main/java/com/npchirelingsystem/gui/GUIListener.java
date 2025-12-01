@@ -351,6 +351,15 @@ public class GUIListener implements Listener {
                     player.openInventory(targetNPC.getInventory());
                 } else if (slot == 20) { // Skill Tree
                     SkillTreeGUI.open(player, targetNPC);
+                } else if (slot == 18) { // Special Skill
+                    if (targetNPC.spendSkillPoint()) {
+                        targetNPC.upgradeSpecialSkill();
+                        player.sendMessage("§aUpgraded " + targetNPC.getSpecialSkillName() + "!");
+                        // Refresh menu
+                        player.openInventory(targetNPC.getInventory());
+                    } else {
+                        player.sendMessage("§cNot enough skill points!");
+                    }
                 } else if (slot == 26) { // Fire button
                     npcManager.fireNPC(targetNPC);
                     player.sendMessage(NPCHirelingSystem.getLang().get("fire_success"));

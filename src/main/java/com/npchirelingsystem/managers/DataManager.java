@@ -58,6 +58,7 @@ public class DataManager {
                 npcData.put("skillPoints", npc.getSkillPoints());
                 npcData.put("dropRateUpgrade", npc.getDropRateUpgrade());
                 npcData.put("rareDropUpgrade", npc.getRareDropUpgrade());
+                npcData.put("specialSkillLevel", npc.getSpecialSkillLevel());
                 
                 npcList.add(npcData);
             }
@@ -100,6 +101,7 @@ public class DataManager {
                     if (npcData.containsKey("skillPoints")) npc.setSkillPoints((int) npcData.get("skillPoints"));
                     if (npcData.containsKey("dropRateUpgrade")) npc.setDropRateUpgrade((int) npcData.get("dropRateUpgrade"));
                     if (npcData.containsKey("rareDropUpgrade")) npc.setRareDropUpgrade((int) npcData.get("rareDropUpgrade"));
+                    if (npcData.containsKey("specialSkillLevel")) npc.setSpecialSkillLevel((int) npcData.get("specialSkillLevel"));
                     
                     if (npcData.containsKey("inventory")) {
                         List<ItemStack> invList = (List<ItemStack>) npcData.get("inventory");
