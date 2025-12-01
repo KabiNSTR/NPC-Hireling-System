@@ -48,7 +48,7 @@ public class NPCHirelingSystem extends JavaPlugin {
         lootManager = new com.npchirelingsystem.managers.LootManager(this);
         
         // Register commands and events here
-        getCommand("hire").setExecutor(new HireCommand());
+        getCommand("hire").setExecutor(new HireCommand(this));
         getCommand("npcadmin").setExecutor(new AdminCommand(this, npcManager, adminNPCManager));
         getCommand("contracts").setExecutor(new com.npchirelingsystem.commands.ContractCommand(contractManager));
         

@@ -134,7 +134,7 @@ public class GUIListener implements Listener {
         if (slot == 0) ContractGUI.open(player, contractManager, ContractManager.ContractCategory.GATHERING);
         else if (slot == 1) ContractGUI.open(player, contractManager, ContractManager.ContractCategory.HUNTING);
         else if (slot == 2) ContractGUI.open(player, contractManager, ContractManager.ContractCategory.LEGENDARY);
-        else if (slot == 44) MainMenuGUI.open(player);
+        else if (slot == 44) MainMenuGUI.open(player, true);
         
         // Contracts
         List<Contract> contracts = contractManager.getContracts(category);

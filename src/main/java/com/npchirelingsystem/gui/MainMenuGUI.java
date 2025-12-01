@@ -12,7 +12,7 @@ import java.util.Arrays;
 
 public class MainMenuGUI {
 
-    public static void open(Player player) {
+    public static void open(Player player, boolean allowAdmin) {
         String title = "NPC Hireling System";
         Inventory inv = Bukkit.createInventory(null, 27, title);
 
@@ -28,8 +28,8 @@ public class MainMenuGUI {
         ItemStack contracts = createItem(Material.PAPER, "§6Contracts & Quests", "§7View available jobs", "§7Earn money!");
         inv.setItem(15, contracts);
         
-        // Admin (if op)
-        if (player.hasPermission("npchirelingsystem.admin")) {
+        // Admin (if op and allowed)
+        if (allowAdmin && player.hasPermission("npchirelingsystem.admin")) {
             ItemStack admin = createItem(Material.COMMAND_BLOCK, "§cAdmin Panel", "§7Server settings & Management");
             inv.setItem(26, admin);
         }

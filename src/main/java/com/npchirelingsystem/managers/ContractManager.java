@@ -54,19 +54,40 @@ public class ContractManager {
 
     private Contract generateContract(ContractCategory category) {
         if (category == ContractCategory.GATHERING) {
-            Material[] items = {Material.COBBLESTONE, Material.COAL, Material.WHEAT, Material.OAK_LOG};
+            Material[] items = {Material.COBBLESTONE, Material.COAL, Material.WHEAT, Material.OAK_LOG, Material.IRON_ORE, Material.GOLD_ORE, Material.DIAMOND, Material.EMERALD};
             Material mat = items[random.nextInt(items.length)];
-            int amount = 32 + random.nextInt(32);
-            return new Contract(ContractType.ITEM_DELIVERY, "Gather " + amount + " " + mat.name(), mat, amount, 100.0);
+            int amount = 16 + random.nextInt(48);
+            if (mat == Material.DIAMOND || mat == Material.EMERALD) amount = 1 + random.nextInt(5);
+            
+            double reward = amount * 5.0;
+            if (mat == Material.DIAMOND) reward *= 20;
+            if (mat == Material.EMERALD) reward *= 25;
+            if (mat == Material.GOLD_ORE) reward *= 5;
+            
+            return new Contract(ContractType.ITEM_DELIVERY, "Gather " + amount + " " + mat.name(), mat, amount, reward);
         } else if (category == ContractCategory.HUNTING) {
-            return new Contract(ContractType.MOB_KILL, "Kill 10 Zombies at Outpost", null, 10, 250.0);
+            String[] mobs = {"Zombie", "Skeleton", "Spider", "Creeper", "Enderman"};
+            String mob = mobs[random.nextInt(mobs.length)];
+            int amount = 5 + random.nextInt(15);
+            return new Contract(ContractType.MOB_KILL, "Kill " + amount + " " + mob + "s", null, amount, amount * 25.0);
         } else {
-            return new Contract(ContractType.LEGENDARY_DELIVERY, "Deliver Secret Package", Material.PAPER, 1, 1000.0);
+            return new Contract(ContractType.LEGENDARY_DELIVERY, "Deliver Secret Package to Remote Outpost", Material.PAPER, 1, 1000.0 + random.nextInt(2000));
         }
     }
 
     public void acceptContract(Player player, Contract contract) {
-        if (contract.type == ContractType.MOB_KILL) {
+        if (contract.type == ContractType.ITEM_DELIVERY) {
+            if (player.getInventory().containsAtLeast(new ItemStack(contract.material), contract.amount)) {
+                player.getInventory().removeItem(new ItemStack(contract.material, contract.amount));
+                NPCHirelingSystem.getEconomy().deposit(player.getUniqueId(), contract.reward);
+                player.sendMessage(NPCHirelingSystem.getLang().get("contract_completed").replace("%reward%", String.valueOf(contract.reward)));
+            } else {
+                player.sendMessage(NPCHirelingSystem.getLang().get("contract_missing_items")
+                        .replace("%amount%", String.valueOf(contract.amount))
+                        .replace("%item%", contract.material.name()));
+            }
+            return;
+        } else if (contract.type == ContractType.MOB_KILL) {
             Location target = player.getLocation().add(random.nextInt(2000)-1000, 0, random.nextInt(2000)-1000);
             target.setY(target.getWorld().getHighestBlockYAt(target) + 1);
             NPCHirelingSystem.getQuestManager().startKillQuest(player, target, contract.amount);

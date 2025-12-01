@@ -43,3 +43,10 @@
 - [x] Implement Special Abilities (Double Drops, Strength Buff)
 - [x] Update Data Persistence for Special Skills
 - [x] Update Version to 3.0
+
+## v3.1 UX & Economy Update
+- [x] Implement Menu Item (Nether Star) for easy access
+- [x] Secure Admin Panel (Only visible via command, not item)
+- [x] Expand Contract System (Specific Item Delivery)
+- [x] Update Localization
+- [x] Update Version to 3.1
