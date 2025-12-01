@@ -51,11 +51,11 @@ public class GUIListener implements Listener {
             }
         } else if (title.startsWith("Edit Loot: ")) {
             handleLootItemEditClick(event);
-        } else if (title.endsWith("'s Inventory")) {
+        } else if (title.endsWith(NPCHirelingSystem.getLang().getRaw("npc_inventory_title_suffix"))) {
             handleNPCMenuClick(event);
-        } else if (title.startsWith("Contracts: ")) {
+        } else if (title.startsWith(NPCHirelingSystem.getLang().getRaw("contracts_prefix"))) {
             handleContractClick(event);
-        } else if (title.startsWith("Skill Tree: ")) {
+        } else if (title.startsWith(NPCHirelingSystem.getLang().getRaw("skill_tree_prefix"))) {
             handleSkillTreeClick(event);
         }
     }
@@ -65,7 +65,7 @@ public class GUIListener implements Listener {
         if (event.getCurrentItem() == null) return;
         Player player = (Player) event.getWhoClicked();
         String title = event.getView().getTitle();
-        String npcName = title.replace("Skill Tree: ", "");
+        String npcName = title.replace(NPCHirelingSystem.getLang().getRaw("skill_tree_prefix"), "");
         
         HirelingNPC npc = null;
         for (HirelingNPC n : npcManager.getAllHirelings()) {
@@ -86,18 +86,18 @@ public class GUIListener implements Listener {
         } else if (slot == 11) { // Drop Rate
             if (npc.spendSkillPoint()) {
                 npc.upgradeDropRate();
-                player.sendMessage("§aUpgraded Drop Rate!");
+                player.sendMessage(NPCHirelingSystem.getLang().get("special_skill_upgrade").replace("%skill%", NPCHirelingSystem.getLang().getRaw("skill_efficiency")));
                 SkillTreeGUI.open(player, npc);
             } else {
-                player.sendMessage("§cNot enough skill points!");
+                player.sendMessage(NPCHirelingSystem.getLang().get("not_enough_points"));
             }
         } else if (slot == 15) { // Rare Drop
             if (npc.spendSkillPoint()) {
                 npc.upgradeRareDrop();
-                player.sendMessage("§aUpgraded Rare Drop Chance!");
+                player.sendMessage(NPCHirelingSystem.getLang().get("special_skill_upgrade").replace("%skill%", NPCHirelingSystem.getLang().getRaw("skill_luck")));
                 SkillTreeGUI.open(player, npc);
             } else {
-                player.sendMessage("§cNot enough skill points!");
+                player.sendMessage(NPCHirelingSystem.getLang().get("not_enough_points"));
             }
         }
     }
@@ -347,7 +347,7 @@ public class GUIListener implements Listener {
 
                 if (slot == 24) { // Follow Toggle
                     targetNPC.toggleFollow();
-                    player.sendMessage("§eNPC Follow Mode: " + (targetNPC.isFollowing() ? "§aEnabled" : "§cDisabled"));
+                    player.sendMessage(NPCHirelingSystem.getLang().get("follow_toggle_msg").replace("%status%", targetNPC.isFollowing() ? "§aEnabled" : "§cDisabled"));
                     player.openInventory(targetNPC.getInventory());
                 } else if (slot == 20) { // Skill Tree
                     SkillTreeGUI.open(player, targetNPC);

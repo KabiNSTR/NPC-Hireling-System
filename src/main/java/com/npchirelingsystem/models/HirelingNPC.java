@@ -64,12 +64,12 @@ public class HirelingNPC {
         ItemMeta infoMeta = info.getItemMeta();
         infoMeta.setDisplayName(NPCHirelingSystem.getLang().getRaw("npc_stats"));
         infoMeta.setLore(Arrays.asList(
-            "§7Name: " + name,
-            "§7Profession: " + profession,
-            "§7Wage: " + wage,
-            "§7Level: §a" + level,
-            "§7XP: §b" + xp + "/" + getNextLevelXp(),
-            "§7Status: " + (isFollowing ? "Following" : "Stationary")
+            NPCHirelingSystem.getLang().getRaw("info_name").replace("%name%", name),
+            NPCHirelingSystem.getLang().getRaw("info_profession").replace("%profession%", profession),
+            NPCHirelingSystem.getLang().getRaw("info_wage").replace("%wage%", String.valueOf(wage)),
+            NPCHirelingSystem.getLang().getRaw("info_level").replace("%level%", String.valueOf(level)),
+            NPCHirelingSystem.getLang().getRaw("info_xp").replace("%xp%", String.valueOf(xp)).replace("%max%", String.valueOf(getNextLevelXp())),
+            NPCHirelingSystem.getLang().getRaw("info_status").replace("%status%", isFollowing ? NPCHirelingSystem.getLang().getRaw("status_following") : NPCHirelingSystem.getLang().getRaw("status_stationary"))
         ));
         info.setItemMeta(infoMeta);
         inventory.setItem(22, info);
@@ -95,12 +95,12 @@ public class HirelingNPC {
         ItemMeta specialMeta = special.getItemMeta();
         specialMeta.setDisplayName(NPCHirelingSystem.getLang().getRaw("special_skill").replace("%skill%", getSpecialSkillName()));
         specialMeta.setLore(Arrays.asList(
-            "§7Level: §e" + specialSkillLevel,
-            "§7Cost: §b1 Skill Point",
-            "§7Effect: Increases effectiveness of",
+            NPCHirelingSystem.getLang().getRaw("special_level").replace("%level%", String.valueOf(specialSkillLevel)),
+            NPCHirelingSystem.getLang().getRaw("skill_cost"),
+            NPCHirelingSystem.getLang().getRaw("special_effect"),
             "§7" + getSpecialSkillName() + " ability.",
             "",
-            "§eClick to Upgrade!"
+            NPCHirelingSystem.getLang().getRaw("click_to_upgrade")
         ));
         special.setItemMeta(specialMeta);
         inventory.setItem(18, special);
