@@ -1,4 +1,7 @@
 D:\project\NPC Hireling System\src\main\java\com\npchirelingsystem\commands\HireCommand.java
+D:\project\NPC Hireling System\src\main\java\com\npchirelingsystem\economy\EconomyProvider.java
+D:\project\NPC Hireling System\src\main\java\com\npchirelingsystem\economy\InternalEconomyProvider.java
+D:\project\NPC Hireling System\src\main\java\com\npchirelingsystem\economy\VaultEconomyProvider.java
 D:\project\NPC Hireling System\src\main\java\com\npchirelingsystem\gui\HiringGUI.java
 D:\project\NPC Hireling System\src\main\java\com\npchirelingsystem\managers\NPCManager.java
 D:\project\NPC Hireling System\src\main\java\com\npchirelingsystem\models\HirelingNPC.java

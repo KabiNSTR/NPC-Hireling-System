@@ -4,7 +4,7 @@ main: com.npchirelingsystem.NPCHirelingSystem
 api-version: 1.20
 authors: [Copilot]
 description: A plugin for hiring and managing NPC workers.
-depend: [Vault]
+softdepend: [Vault]
 
 commands:
   hire:
