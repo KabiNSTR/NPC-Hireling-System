@@ -7,6 +7,8 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
+import org.bukkit.inventory.ItemStack;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,6 +50,7 @@ public class DataManager {
                 npcData.put("profession", npc.getProfession());
                 npcData.put("wage", npc.getWage());
                 npcData.put("location", npc.getLastLocation());
+                npcData.put("inventory", npc.getInventory().getContents());
                 npcList.add(npcData);
             }
             
@@ -80,8 +83,16 @@ public class DataManager {
                     String profession = (String) npcData.get("profession");
                     double wage = (Double) npcData.get("wage");
                     Location location = (Location) npcData.get("location");
-
+                    
                     HirelingNPC npc = new HirelingNPC(ownerId, name, profession, wage, location);
+                    
+                    if (npcData.containsKey("inventory")) {
+                        List<ItemStack> invList = (List<ItemStack>) npcData.get("inventory");
+                        if (invList != null) {
+                            npc.setInventoryContents(invList.toArray(new ItemStack[0]));
+                        }
+                    }
+                    
                     npcs.add(npc);
                 }
                 

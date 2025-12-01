@@ -39,9 +39,13 @@ public class NPCHirelingSystem extends JavaPlugin {
         getCommand("npcadmin").setExecutor(new AdminCommand(this, npcManager));
         getServer().getPluginManager().registerEvents(new com.npchirelingsystem.gui.GUIListener(npcManager), this);
         getServer().getPluginManager().registerEvents(new com.npchirelingsystem.listeners.PlayerListener(npcManager), this);
+        getServer().getPluginManager().registerEvents(new com.npchirelingsystem.listeners.NPCInteractionListener(npcManager), this);
         
         // Start wage task (every 60 seconds = 1200 ticks)
         new com.npchirelingsystem.tasks.WageTask(npcManager).runTaskTimer(this, 1200L, 1200L);
+        
+        // Start job task (every 5 seconds = 100 ticks)
+        new com.npchirelingsystem.tasks.JobTask(npcManager).runTaskTimer(this, 100L, 100L);
         
         getLogger().info("NPCHirelingSystem enabled! Using economy: " + economyProvider.getName());
     }

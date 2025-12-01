@@ -10,6 +10,8 @@ com\npchirelingsystem\gui\GUIListener.class
 com\npchirelingsystem\utils\LanguageManager.class
 com\npchirelingsystem\economy\InternalEconomyProvider.class
 com\npchirelingsystem\gui\AdminGUI.class
+com\npchirelingsystem\listeners\NPCInteractionListener.class
+com\npchirelingsystem\tasks\JobTask.class
 com\npchirelingsystem\managers\NPCManager.class
 com\npchirelingsystem\economy\EconomyProvider.class
 com\npchirelingsystem\models\HirelingNPC.class

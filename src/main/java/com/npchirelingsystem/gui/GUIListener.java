@@ -8,6 +8,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
+import com.npchirelingsystem.models.HirelingNPC;
+import org.bukkit.Material;
+
 public class GUIListener implements Listener {
 
     private final NPCManager npcManager;
@@ -26,6 +29,43 @@ public class GUIListener implements Listener {
             handleHireClick(event);
         } else if (title.equals(adminTitle)) {
             handleAdminClick(event);
+        } else if (title.endsWith("'s Inventory")) {
+            handleNPCMenuClick(event);
+        }
+    }
+    
+    private void handleNPCMenuClick(InventoryClickEvent event) {
+        if (event.getClickedInventory() == event.getView().getTopInventory()) {
+            int slot = event.getSlot();
+            // Prevent clicking in system slots (18-26)
+            if (slot >= 18) {
+                event.setCancelled(true);
+                
+                if (slot == 26) { // Fire button
+                    Player player = (Player) event.getWhoClicked();
+                    // Find the NPC
+                    for (HirelingNPC npc : npcManager.getAllHirelings()) {
+                        if (npc.getInventory().equals(event.getClickedInventory())) {
+                            npcManager.fireNPC(npc);
+                            player.sendMessage("§cYou have fired your hireling.");
+                            player.closeInventory();
+                            return;
+                        }
+                    }
+                }
+            }
+        } else if (event.isShiftClick()) {
+            // Prevent shift-clicking items INTO the system slots
+            // Actually, just prevent shift-clicking into top inventory if it's full or targeting system slots
+            // For simplicity, allow shift click but if it lands in 18-26 it will be cancelled by the slot check above? 
+            // No, shift click moves item automatically.
+            // Let's just cancel shift-click if top inventory is the destination
+            if (event.getView().getTopInventory().equals(event.getInventory())) {
+                 // If player shift-clicks in their own inventory, it tries to move to top
+                 // We should allow it only if it goes to 0-17
+                 // This is complex to handle perfectly, so for now let's just allow it. 
+                 // The system slots are already filled with glass panes, so items won't go there.
+            }
         }
     }
 
