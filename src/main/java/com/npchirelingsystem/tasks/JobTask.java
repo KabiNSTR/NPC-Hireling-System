@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
+import org.bukkit.entity.Mob;
+
 public class JobTask extends BukkitRunnable {
 
     private final NPCManager npcManager;
@@ -33,26 +35,76 @@ public class JobTask extends BukkitRunnable {
             Entity entity = Bukkit.getEntity(npc.getEntityUuid());
             if (entity == null || !entity.isValid()) continue;
 
+            // AI: Follow Owner
+            if (npc.isFollowing() && entity instanceof Mob) {
+                Player owner = Bukkit.getPlayer(npc.getOwnerId());
+                if (owner != null && owner.isOnline() && owner.getWorld().equals(entity.getWorld())) {
+                    if (entity.getLocation().distanceSquared(owner.getLocation()) > 100) {
+                        entity.teleport(owner.getLocation());
+                    } else if (entity.getLocation().distanceSquared(owner.getLocation()) > 9) {
+                        ((Mob) entity).setTarget(owner);
+                    } else {
+                        ((Mob) entity).setTarget(null); // Stop pushing the player
+                    }
+                }
+            }
+
+            // Job Logic
             switch (npc.getProfession().toUpperCase()) {
                 case "FARMER":
                 case "SHEPHERD":
-                case "FISHERMAN":
                     doFarming(npc);
+                    break;
+                case "FISHERMAN":
+                    doFishing(npc);
+                    break;
+                case "LUMBERJACK":
+                    doLumberjack(npc);
                     break;
                 case "ARMORER":
                 case "TOOLSMITH":
                 case "WEAPONSMITH":
                 case "MASON":
+                case "MINER":
                     doMining(npc);
                     break;
                 case "BUTCHER":
                 case "LEATHERWORKER":
+                case "HUNTER":
                     doHunting(npc, entity);
                     break;
                 default:
                     // Guards or others
                     doGuarding(npc, entity);
                     break;
+            }
+        }
+    }
+
+    private void doLumberjack(HirelingNPC npc) {
+        int chance = NPCHirelingSystem.getInstance().getConfig().getInt("jobs.lumberjack.chance", 8);
+        if (random.nextInt(100) < chance) {
+            List<String> items = NPCHirelingSystem.getInstance().getConfig().getStringList("jobs.lumberjack.items");
+            if (items.isEmpty()) items = List.of("OAK_LOG", "BIRCH_LOG", "STICK", "APPLE");
+            
+            String matName = items.get(random.nextInt(items.size()));
+            Material mat = Material.getMaterial(matName);
+            if (mat != null) {
+                addItemToStorage(npc, new ItemStack(mat, 1));
+            }
+        }
+    }
+
+    private void doFishing(HirelingNPC npc) {
+        int chance = NPCHirelingSystem.getInstance().getConfig().getInt("jobs.fisherman.chance", 8);
+        if (random.nextInt(100) < chance) {
+            List<String> items = NPCHirelingSystem.getInstance().getConfig().getStringList("jobs.fisherman.items");
+            if (items.isEmpty()) items = List.of("COD", "SALMON", "TROPICAL_FISH", "PUFFERFISH", "NAUTILUS_SHELL");
+            
+            String matName = items.get(random.nextInt(items.size()));
+            Material mat = Material.getMaterial(matName);
+            if (mat != null) {
+                addItemToStorage(npc, new ItemStack(mat, 1));
             }
         }
     }

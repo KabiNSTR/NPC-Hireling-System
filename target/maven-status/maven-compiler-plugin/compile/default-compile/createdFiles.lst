@@ -1,11 +1,13 @@
 com\npchirelingsystem\commands\AdminCommand.class
 com\npchirelingsystem\commands\HireCommand.class
+com\npchirelingsystem\gui\WageEditorGUI.class
 com\npchirelingsystem\listeners\PlayerListener.class
 com\npchirelingsystem\gui\HiringGUI.class
 com\npchirelingsystem\NPCHirelingSystem.class
 com\npchirelingsystem\tasks\WageTask.class
 com\npchirelingsystem\economy\VaultEconomyProvider.class
 com\npchirelingsystem\managers\DataManager.class
+com\npchirelingsystem\gui\LootEditorGUI.class
 com\npchirelingsystem\gui\GUIListener.class
 com\npchirelingsystem\utils\LanguageManager.class
 com\npchirelingsystem\economy\InternalEconomyProvider.class
@@ -15,3 +17,4 @@ com\npchirelingsystem\tasks\JobTask.class
 com\npchirelingsystem\managers\NPCManager.class
 com\npchirelingsystem\economy\EconomyProvider.class
 com\npchirelingsystem\models\HirelingNPC.class
+com\npchirelingsystem\gui\SettingsGUI.class

@@ -6,7 +6,8 @@ import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Villager;
+import org.bukkit.entity.Zombie;
+import org.bukkit.inventory.EntityEquipment;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
@@ -24,6 +25,7 @@ public class HirelingNPC {
     private UUID entityUuid;
     private Location lastLocation;
     private final Inventory inventory;
+    private boolean isFollowing = false;
 
     public HirelingNPC(UUID ownerId, String name, String profession, double wage) {
         this.ownerId = ownerId;
@@ -56,10 +58,19 @@ public class HirelingNPC {
         infoMeta.setLore(Arrays.asList(
             "§7Name: " + name,
             "§7Profession: " + profession,
-            "§7Wage: " + wage
+            "§7Wage: " + wage,
+            "§7Status: " + (isFollowing ? "Following" : "Stationary")
         ));
         info.setItemMeta(infoMeta);
         inventory.setItem(22, info);
+
+        // Follow Toggle
+        ItemStack follow = new ItemStack(Material.COMPASS);
+        ItemMeta followMeta = follow.getItemMeta();
+        followMeta.setDisplayName("§eToggle Follow");
+        followMeta.setLore(Arrays.asList("§7Click to make NPC follow/stay."));
+        follow.setItemMeta(followMeta);
+        inventory.setItem(24, follow);
         
         // Fire Button
         ItemStack fire = new ItemStack(Material.RED_WOOL);
@@ -68,6 +79,15 @@ public class HirelingNPC {
         fireMeta.setLore(Arrays.asList(NPCHirelingSystem.getLang().getRaw("fire_lore")));
         fire.setItemMeta(fireMeta);
         inventory.setItem(26, fire);
+    }
+    
+    public void toggleFollow() {
+        this.isFollowing = !this.isFollowing;
+        setupMenu(); // Update lore
+    }
+
+    public boolean isFollowing() {
+        return isFollowing;
     }
     
     public HirelingNPC(UUID ownerId, String name, String profession, double wage, Location lastLocation) {
@@ -99,21 +119,102 @@ public class HirelingNPC {
         Location spawnLoc = (lastLocation != null) ? lastLocation : location;
         if (spawnLoc == null) return;
 
-        LivingEntity entity = (LivingEntity) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.VILLAGER);
+        LivingEntity entity = (LivingEntity) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.ZOMBIE);
         entity.setCustomName(name + " (" + profession + ")");
         entity.setCustomNameVisible(true);
-        entity.setAI(true); // Can be set to false if we want them static
+        entity.setAI(true); 
         
-        if (entity instanceof Villager) {
-            try {
-                ((Villager) entity).setProfession(Villager.Profession.valueOf(profession.toUpperCase()));
-            } catch (IllegalArgumentException e) {
-                ((Villager) entity).setProfession(Villager.Profession.FARMER);
-            }
+        if (entity instanceof Zombie) {
+            Zombie zombie = (Zombie) entity;
+            zombie.setAdult();
+            zombie.setSilent(true);
+            // zombie.setShouldBurnInDay(false); // Removed as it might not be available
+            
+            equipNPC(zombie);
         }
 
         this.entityUuid = entity.getUniqueId();
         this.lastLocation = spawnLoc;
+    }
+
+    private void equipNPC(LivingEntity entity) {
+        EntityEquipment equipment = entity.getEquipment();
+        if (equipment == null) return;
+
+        equipment.clear();
+        
+        ItemStack helmet = null;
+        ItemStack chest = null;
+        ItemStack legs = null;
+        ItemStack boots = null;
+        ItemStack hand = null;
+        ItemStack offhand = null;
+        
+        switch (profession.toLowerCase()) {
+            case "miner":
+                helmet = new ItemStack(Material.IRON_HELMET);
+                chest = new ItemStack(Material.IRON_CHESTPLATE);
+                legs = new ItemStack(Material.IRON_LEGGINGS);
+                boots = new ItemStack(Material.IRON_BOOTS);
+                hand = new ItemStack(Material.IRON_PICKAXE);
+                break;
+            case "guard":
+                helmet = new ItemStack(Material.IRON_HELMET);
+                chest = new ItemStack(Material.CHAINMAIL_CHESTPLATE);
+                legs = new ItemStack(Material.CHAINMAIL_LEGGINGS);
+                boots = new ItemStack(Material.IRON_BOOTS);
+                hand = new ItemStack(Material.IRON_SWORD);
+                offhand = new ItemStack(Material.SHIELD);
+                break;
+            case "farmer":
+                helmet = new ItemStack(Material.LEATHER_HELMET);
+                chest = new ItemStack(Material.LEATHER_CHESTPLATE);
+                legs = new ItemStack(Material.LEATHER_LEGGINGS);
+                boots = new ItemStack(Material.LEATHER_BOOTS);
+                hand = new ItemStack(Material.IRON_HOE);
+                break;
+            case "hunter":
+                helmet = new ItemStack(Material.LEATHER_HELMET);
+                chest = new ItemStack(Material.LEATHER_CHESTPLATE);
+                legs = new ItemStack(Material.LEATHER_LEGGINGS);
+                boots = new ItemStack(Material.LEATHER_BOOTS);
+                hand = new ItemStack(Material.BOW);
+                break;
+            case "lumberjack":
+                helmet = new ItemStack(Material.LEATHER_HELMET);
+                chest = new ItemStack(Material.CHAINMAIL_CHESTPLATE);
+                legs = new ItemStack(Material.LEATHER_LEGGINGS);
+                boots = new ItemStack(Material.LEATHER_BOOTS);
+                hand = new ItemStack(Material.IRON_AXE);
+                break;
+            case "fisherman":
+                helmet = new ItemStack(Material.TURTLE_HELMET);
+                chest = new ItemStack(Material.LEATHER_CHESTPLATE);
+                legs = new ItemStack(Material.LEATHER_LEGGINGS);
+                boots = new ItemStack(Material.LEATHER_BOOTS);
+                hand = new ItemStack(Material.FISHING_ROD);
+                break;
+        }
+        
+        if (helmet != null) {
+            ItemMeta meta = helmet.getItemMeta();
+            meta.setUnbreakable(true);
+            helmet.setItemMeta(meta);
+            equipment.setHelmet(helmet);
+        }
+        if (chest != null) equipment.setChestplate(chest);
+        if (legs != null) equipment.setLeggings(legs);
+        if (boots != null) equipment.setBoots(boots);
+        if (hand != null) equipment.setItemInMainHand(hand);
+        if (offhand != null) equipment.setItemInOffHand(offhand);
+        
+        // Ensure they don't drop items on death
+        equipment.setHelmetDropChance(0f);
+        equipment.setChestplateDropChance(0f);
+        equipment.setLeggingsDropChance(0f);
+        equipment.setBootsDropChance(0f);
+        equipment.setItemInMainHandDropChance(0f);
+        equipment.setItemInOffHandDropChance(0f);
     }
 
     public void despawn() {

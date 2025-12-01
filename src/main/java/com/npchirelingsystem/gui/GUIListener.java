@@ -92,6 +92,8 @@ public class GUIListener implements Listener {
         else if (item.getType() == Material.IRON_SWORD) job = "guard";
         else if (item.getType() == Material.IRON_HOE) job = "farmer";
         else if (item.getType() == Material.BOW) job = "hunter";
+        else if (item.getType() == Material.IRON_AXE) job = "lumberjack";
+        else if (item.getType() == Material.FISHING_ROD) job = "fisherman";
         
         if (job != null) {
             FileConfiguration config = NPCHirelingSystem.getInstance().getConfig();
@@ -123,6 +125,8 @@ public class GUIListener implements Listener {
         if (name.contains("miner")) LootEditorGUI.openEditor(player, "miner");
         else if (name.contains("farmer")) LootEditorGUI.openEditor(player, "farmer");
         else if (name.contains("hunter")) LootEditorGUI.openEditor(player, "hunter");
+        else if (name.contains("Lumberjack")) LootEditorGUI.openEditor(player, "lumberjack");
+        else if (name.contains("Fisherman")) LootEditorGUI.openEditor(player, "fisherman");
     }
     
     private void handleLootEditClick(InventoryClickEvent event) {
@@ -185,17 +189,27 @@ public class GUIListener implements Listener {
             if (slot >= 18) {
                 event.setCancelled(true);
                 
-                if (slot == 26) { // Fire button
-                    Player player = (Player) event.getWhoClicked();
-                    // Find the NPC
-                    for (HirelingNPC npc : npcManager.getAllHirelings()) {
-                        if (npc.getInventory().equals(event.getClickedInventory())) {
-                            npcManager.fireNPC(npc);
-                            player.sendMessage(NPCHirelingSystem.getLang().get("fire_success"));
-                            player.closeInventory();
-                            return;
-                        }
+                Player player = (Player) event.getWhoClicked();
+                // Find the NPC
+                HirelingNPC targetNPC = null;
+                for (HirelingNPC npc : npcManager.getAllHirelings()) {
+                    if (npc.getInventory().equals(event.getClickedInventory())) {
+                        targetNPC = npc;
+                        break;
                     }
+                }
+                
+                if (targetNPC == null) return;
+
+                if (slot == 24) { // Follow Toggle
+                    targetNPC.toggleFollow();
+                    player.sendMessage("§eNPC Follow Mode: " + (targetNPC.isFollowing() ? "§aEnabled" : "§cDisabled"));
+                    // Re-open to update lore
+                    player.openInventory(targetNPC.getInventory());
+                } else if (slot == 26) { // Fire button
+                    npcManager.fireNPC(targetNPC);
+                    player.sendMessage(NPCHirelingSystem.getLang().get("fire_success"));
+                    player.closeInventory();
                 }
             }
         } else if (event.isShiftClick()) {
@@ -230,13 +244,22 @@ public class GUIListener implements Listener {
 
         if (name.equals(minerName)) {
             double wage = config.getDouble("wages.miner", 10.0);
-            npcManager.hireNPC(player, "ARMORER", wage);
+            npcManager.hireNPC(player, "MINER", wage);
         } else if (name.equals(guardName)) {
             double wage = config.getDouble("wages.guard", 15.0);
-            npcManager.hireNPC(player, "WEAPONSMITH", wage);
+            npcManager.hireNPC(player, "GUARD", wage);
         } else if (name.equals(farmerName)) {
             double wage = config.getDouble("wages.farmer", 8.0);
             npcManager.hireNPC(player, "FARMER", wage);
+        } else if (name.equals(NPCHirelingSystem.getLang().getRaw("npc_hunter"))) {
+            double wage = config.getDouble("wages.hunter", 12.0);
+            npcManager.hireNPC(player, "HUNTER", wage);
+        } else if (name.equals(NPCHirelingSystem.getLang().getRaw("npc_lumberjack"))) {
+            double wage = config.getDouble("wages.lumberjack", 9.0);
+            npcManager.hireNPC(player, "LUMBERJACK", wage);
+        } else if (name.equals(NPCHirelingSystem.getLang().getRaw("npc_fisherman"))) {
+            double wage = config.getDouble("wages.fisherman", 9.0);
+            npcManager.hireNPC(player, "FISHERMAN", wage);
         }
         
         player.closeInventory();

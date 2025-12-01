@@ -10,12 +10,44 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityTargetEvent;
+
 public class NPCInteractionListener implements Listener {
 
     private final NPCManager npcManager;
 
     public NPCInteractionListener(NPCManager npcManager) {
         this.npcManager = npcManager;
+    }
+
+    @EventHandler
+    public void onEntityTarget(EntityTargetEvent event) {
+        Entity entity = event.getEntity();
+        for (HirelingNPC npc : npcManager.getAllHirelings()) {
+            if (npc.getEntityUuid() != null && npc.getEntityUuid().equals(entity.getUniqueId())) {
+                // Allow targeting owner for "Follow" mechanic
+                if (event.getTarget() instanceof Player) {
+                    Player target = (Player) event.getTarget();
+                    if (target.getUniqueId().equals(npc.getOwnerId()) && npc.isFollowing()) {
+                        return; // Allow
+                    }
+                }
+                event.setCancelled(true);
+                return;
+            }
+        }
+    }
+
+    @EventHandler
+    public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
+        Entity damager = event.getDamager();
+        for (HirelingNPC npc : npcManager.getAllHirelings()) {
+            if (npc.getEntityUuid() != null && npc.getEntityUuid().equals(damager.getUniqueId())) {
+                event.setCancelled(true); // Prevent NPC from hurting anyone
+                return;
+            }
+        }
     }
 
     @EventHandler

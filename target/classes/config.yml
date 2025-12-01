@@ -1,5 +1,14 @@
 lang: en
 
+# Economy Settings (Wages per minute)
+wages:
+  miner: 10.0
+  guard: 15.0
+  farmer: 8.0
+  hunter: 12.0
+  lumberjack: 9.0
+  fisherman: 9.0
+
 # Job Settings
 jobs:
   farmer:
@@ -23,3 +32,18 @@ jobs:
       - PORKCHOP
       - CHICKEN
       - LEATHER
+  lumberjack:
+    chance: 8
+    items:
+      - OAK_LOG
+      - BIRCH_LOG
+      - STICK
+      - APPLE
+  fisherman:
+    chance: 8
+    items:
+      - COD
+      - SALMON
+      - TROPICAL_FISH
+      - PUFFERFISH
+      - NAUTILUS_SHELL
