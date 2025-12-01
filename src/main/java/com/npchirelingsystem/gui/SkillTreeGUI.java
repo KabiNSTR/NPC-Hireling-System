@@ -1,6 +1,7 @@
 package com.npchirelingsystem.gui;
 
 import com.npchirelingsystem.models.HirelingNPC;
+import com.npchirelingsystem.NPCHirelingSystem;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -38,14 +39,14 @@ public class SkillTreeGUI {
         // Drop Rate Upgrade
         ItemStack dropRate = new ItemStack(Material.GOLD_NUGGET);
         ItemMeta dropMeta = dropRate.getItemMeta();
-        dropMeta.setDisplayName("§6Efficiency Training");
+        dropMeta.setDisplayName(NPCHirelingSystem.getLang().getRaw("skill_efficiency"));
         dropMeta.setLore(Arrays.asList(
-            "§7Increases item drop rate.",
-            "§7Current Level: " + npc.getDropRateUpgrade(),
+            NPCHirelingSystem.getLang().getRaw("skill_efficiency_lore"),
+            NPCHirelingSystem.getLang().getRaw("skill_level").replace("%level%", String.valueOf(npc.getDropRateUpgrade())).replace("%max%", "∞"),
             "§7Bonus: +" + (npc.getDropRateUpgrade() * 5) + "%",
             "",
-            "§eCost: 1 Skill Point",
-            npc.getSkillPoints() > 0 ? "§aClick to Upgrade" : "§cNot enough points"
+            NPCHirelingSystem.getLang().getRaw("skill_cost"),
+            npc.getSkillPoints() > 0 ? NPCHirelingSystem.getLang().getRaw("click_to_upgrade") : NPCHirelingSystem.getLang().getRaw("not_enough_points")
         ));
         dropRate.setItemMeta(dropMeta);
         inv.setItem(11, dropRate);
@@ -53,14 +54,14 @@ public class SkillTreeGUI {
         // Rare Drop Upgrade
         ItemStack rareDrop = new ItemStack(Material.DIAMOND);
         ItemMeta rareMeta = rareDrop.getItemMeta();
-        rareMeta.setDisplayName("§bLuck Training");
+        rareMeta.setDisplayName(NPCHirelingSystem.getLang().getRaw("skill_luck"));
         rareMeta.setLore(Arrays.asList(
-            "§7Increases rare drop chance.",
-            "§7Current Level: " + npc.getRareDropUpgrade(),
+            NPCHirelingSystem.getLang().getRaw("skill_luck_lore"),
+            NPCHirelingSystem.getLang().getRaw("skill_level").replace("%level%", String.valueOf(npc.getRareDropUpgrade())).replace("%max%", "∞"),
             "§7Bonus: +" + (npc.getRareDropUpgrade() * 1) + "%",
             "",
-            "§eCost: 1 Skill Point",
-            npc.getSkillPoints() > 0 ? "§aClick to Upgrade" : "§cNot enough points"
+            NPCHirelingSystem.getLang().getRaw("skill_cost"),
+            npc.getSkillPoints() > 0 ? NPCHirelingSystem.getLang().getRaw("click_to_upgrade") : NPCHirelingSystem.getLang().getRaw("not_enough_points")
         ));
         rareDrop.setItemMeta(rareMeta);
         inv.setItem(15, rareDrop);
@@ -68,7 +69,7 @@ public class SkillTreeGUI {
         // Back Button
         ItemStack back = new ItemStack(Material.ARROW);
         ItemMeta backMeta = back.getItemMeta();
-        backMeta.setDisplayName("§cBack");
+        backMeta.setDisplayName(NPCHirelingSystem.getLang().getRaw("back_button"));
         back.setItemMeta(backMeta);
         inv.setItem(22, back);
 

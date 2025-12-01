@@ -27,13 +27,17 @@ public class QuestManager {
         ActiveQuest quest = new ActiveQuest(QuestType.KILL, targetLoc);
         quest.mobCount = mobCount;
         activeQuests.put(player.getUniqueId(), quest);
-        player.sendMessage("§e[Quest] §fGo to coordinates: X:" + targetLoc.getBlockX() + " Z:" + targetLoc.getBlockZ() + " to find the monsters!");
+        player.sendMessage(NPCHirelingSystem.getLang().get("quest_go_to")
+                .replace("%x%", String.valueOf(targetLoc.getBlockX()))
+                .replace("%z%", String.valueOf(targetLoc.getBlockZ())));
     }
 
     public void startLegendaryQuest(Player player, Location targetLoc) {
         ActiveQuest quest = new ActiveQuest(QuestType.LEGENDARY, targetLoc);
         activeQuests.put(player.getUniqueId(), quest);
-        player.sendMessage("§6[Legendary] §fDeliver the item to the mysterious contact at X:" + targetLoc.getBlockX() + " Z:" + targetLoc.getBlockZ());
+        player.sendMessage(NPCHirelingSystem.getLang().get("quest_legendary")
+                .replace("%x%", String.valueOf(targetLoc.getBlockX()))
+                .replace("%z%", String.valueOf(targetLoc.getBlockZ())));
     }
 
     private void startQuestTicker() {

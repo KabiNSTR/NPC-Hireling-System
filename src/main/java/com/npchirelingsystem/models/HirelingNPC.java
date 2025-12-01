@@ -77,23 +77,23 @@ public class HirelingNPC {
         // Follow Toggle
         ItemStack follow = new ItemStack(Material.COMPASS);
         ItemMeta followMeta = follow.getItemMeta();
-        followMeta.setDisplayName("§eToggle Follow");
-        followMeta.setLore(Arrays.asList("§7Click to make NPC follow/stay."));
+        followMeta.setDisplayName(NPCHirelingSystem.getLang().getRaw("toggle_follow"));
+        followMeta.setLore(Arrays.asList(NPCHirelingSystem.getLang().getRaw("toggle_follow_lore")));
         follow.setItemMeta(followMeta);
         inventory.setItem(24, follow);
         
         // Upgrade Button
         ItemStack upgrade = new ItemStack(Material.EXPERIENCE_BOTTLE);
         ItemMeta upgradeMeta = upgrade.getItemMeta();
-        upgradeMeta.setDisplayName("§bSkill Tree");
-        upgradeMeta.setLore(Arrays.asList("§7Click to open upgrades."));
+        upgradeMeta.setDisplayName(NPCHirelingSystem.getLang().getRaw("skill_tree"));
+        upgradeMeta.setLore(Arrays.asList(NPCHirelingSystem.getLang().getRaw("skill_tree_lore")));
         upgrade.setItemMeta(upgradeMeta);
         inventory.setItem(20, upgrade);
         
         // Special Skill Button
         ItemStack special = new ItemStack(Material.ENCHANTED_BOOK);
         ItemMeta specialMeta = special.getItemMeta();
-        specialMeta.setDisplayName("§6Special: " + getSpecialSkillName());
+        specialMeta.setDisplayName(NPCHirelingSystem.getLang().getRaw("special_skill").replace("%skill%", getSpecialSkillName()));
         specialMeta.setLore(Arrays.asList(
             "§7Level: §e" + specialSkillLevel,
             "§7Cost: §b1 Skill Point",
@@ -125,7 +125,9 @@ public class HirelingNPC {
             this.level++;
             this.skillPoints++;
             Player owner = Bukkit.getPlayer(ownerId);
-            if (owner != null) owner.sendMessage("§aYour hireling " + name + " leveled up to " + level + "! (+1 Skill Point)");
+            if (owner != null) owner.sendMessage(NPCHirelingSystem.getLang().get("level_up")
+                    .replace("%name%", name)
+                    .replace("%level%", String.valueOf(level)));
             setupMenu();
         }
     }

@@ -32,7 +32,7 @@ public class LootItemEditorGUI {
         }
         
         if (targetItem == null) {
-            player.sendMessage("§cItem not found in loot table.");
+            player.sendMessage(NPCHirelingSystem.getLang().getRaw("loot_item_not_found"));
             LootEditorGUI.openEditor(player, profession);
             return;
         }
@@ -40,7 +40,7 @@ public class LootItemEditorGUI {
         // Display Item
         ItemStack display = new ItemStack(material);
         ItemMeta meta = display.getItemMeta();
-        meta.setDisplayName("§e" + material.name());
+        meta.setDisplayName(NPCHirelingSystem.getLang().getRaw("loot_item_editor").replace("%item%", material.name()));
         meta.setLore(Arrays.asList(
             "§7Min: §f" + targetItem.min,
             "§7Max: §f" + targetItem.max,

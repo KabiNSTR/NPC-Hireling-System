@@ -69,7 +69,10 @@ public class HirelingTrait extends Trait {
                 
                 Player owner = Bukkit.getPlayer(hireling.getOwnerId());
                 if (owner != null && owner.isOnline()) {
-                    owner.sendMessage("§a[NPC] " + hireling.getName() + " found " + amount + "x " + item.getType().name() + "!");
+                    owner.sendMessage(com.npchirelingsystem.NPCHirelingSystem.getLang().get("npc_found_item")
+                            .replace("%name%", hireling.getName())
+                            .replace("%amount%", String.valueOf(amount))
+                            .replace("%item%", item.getType().name()));
                 }
             }
         }

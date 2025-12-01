@@ -72,11 +72,23 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (event.getCurrentItem() != null && event.getCurrentItem().isSimilar(menuItem)) {
-            event.setCancelled(true); // Prevent moving/dropping
+            event.setCancelled(true);
+            if (event.getWhoClicked() instanceof org.bukkit.entity.Player) {
+                ((org.bukkit.entity.Player) event.getWhoClicked()).updateInventory();
+            }
         }
         // Also check hotbar swap
         if (event.getHotbarButton() == 8) {
             event.setCancelled(true);
+            if (event.getWhoClicked() instanceof org.bukkit.entity.Player) {
+                ((org.bukkit.entity.Player) event.getWhoClicked()).updateInventory();
+            }
+        }
+        // Check if swapping with offhand (F key)
+        if (event.getClick() == org.bukkit.event.inventory.ClickType.SWAP_OFFHAND) {
+             if (event.getWhoClicked().getInventory().getItemInMainHand().isSimilar(menuItem)) {
+                 event.setCancelled(true);
+             }
         }
     }
 }

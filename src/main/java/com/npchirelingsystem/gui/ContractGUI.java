@@ -1,5 +1,6 @@
 package com.npchirelingsystem.gui;
 
+import com.npchirelingsystem.NPCHirelingSystem;
 import com.npchirelingsystem.managers.ContractManager;
 import com.npchirelingsystem.managers.ContractManager.Contract;
 import com.npchirelingsystem.managers.ContractManager.ContractCategory;
@@ -51,7 +52,7 @@ public class ContractGUI {
         // Back
         ItemStack back = new ItemStack(Material.ARROW);
         ItemMeta backMeta = back.getItemMeta();
-        backMeta.setDisplayName("§cBack to Main Menu");
+        backMeta.setDisplayName(NPCHirelingSystem.getLang().getRaw("contract_back"));
         back.setItemMeta(backMeta);
         inv.setItem(44, back);
 

@@ -96,7 +96,7 @@ public class ContractManager {
             target.setY(target.getWorld().getHighestBlockYAt(target) + 1);
             NPCHirelingSystem.getQuestManager().startLegendaryQuest(player, target);
         }
-        player.sendMessage("§aContract Accepted: " + contract.description);
+        player.sendMessage(NPCHirelingSystem.getLang().get("contract_accepted").replace("%description%", contract.description));
     }
 
     public static class Contract {
