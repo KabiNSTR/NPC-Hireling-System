@@ -4,6 +4,7 @@ main: com.npchirelingsystem.NPCHirelingSystem
 api-version: 1.20
 authors: [KabiNSTR]
 description: A plugin for hiring and managing NPC workers.
+depend: [Citizens]
 softdepend: [Vault]
 
 commands:

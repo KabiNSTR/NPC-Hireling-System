@@ -1,24 +1,23 @@
 package com.npchirelingsystem.managers;
 
 import com.npchirelingsystem.NPCHirelingSystem;
-import org.bukkit.Bukkit;
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Villager;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class AdminNPCManager {
 
     private final NPCHirelingSystem plugin;
-    private final List<UUID> adminNPCs = new ArrayList<>();
+    private final List<Integer> adminNPCIds = new ArrayList<>();
     private final File file;
     private FileConfiguration config;
 
@@ -29,36 +28,30 @@ public class AdminNPCManager {
     }
 
     public void createAdminNPC(Location loc, String name) {
-        Villager villager = (Villager) loc.getWorld().spawnEntity(loc, EntityType.VILLAGER);
-        villager.setCustomName(name);
-        villager.setCustomNameVisible(true);
-        villager.setAI(false);
-        villager.setInvulnerable(true);
-        villager.setProfession(Villager.Profession.LIBRARIAN);
+        NPC npc = CitizensAPI.getNPCRegistry().createNPC(EntityType.VILLAGER, name);
+        npc.spawn(loc);
         
-        adminNPCs.add(villager.getUniqueId());
+        adminNPCIds.add(npc.getId());
         saveNPCs();
     }
 
     public boolean isAdminNPC(Entity entity) {
-        return adminNPCs.contains(entity.getUniqueId());
+        NPC npc = CitizensAPI.getNPCRegistry().getNPC(entity);
+        return npc != null && adminNPCIds.contains(npc.getId());
     }
 
     public void removeAdminNPC(Entity entity) {
-        if (isAdminNPC(entity)) {
-            adminNPCs.remove(entity.getUniqueId());
-            entity.remove();
+        NPC npc = CitizensAPI.getNPCRegistry().getNPC(entity);
+        if (npc != null && adminNPCIds.contains(npc.getId())) {
+            adminNPCIds.remove((Integer) npc.getId());
+            npc.destroy();
             saveNPCs();
         }
     }
 
     private void saveNPCs() {
         config = new YamlConfiguration();
-        List<String> list = new ArrayList<>();
-        for (UUID uuid : adminNPCs) {
-            list.add(uuid.toString());
-        }
-        config.set("npcs", list);
+        config.set("npcs", adminNPCIds);
         try {
             config.save(file);
         } catch (IOException e) {
@@ -69,20 +62,18 @@ public class AdminNPCManager {
     private void loadNPCs() {
         if (!file.exists()) return;
         config = YamlConfiguration.loadConfiguration(file);
-        List<String> list = config.getStringList("npcs");
-        for (String s : list) {
-            try {
-                adminNPCs.add(UUID.fromString(s));
-            } catch (IllegalArgumentException e) {
-                // Ignore invalid UUIDs
-            }
-        }
+        adminNPCIds.clear();
+        adminNPCIds.addAll(config.getIntegerList("npcs"));
     }
     
     public void despawnAll() {
-        for (UUID uuid : adminNPCs) {
-            Entity e = Bukkit.getEntity(uuid);
-            if (e != null) e.remove();
+        // We don't destroy them, just let Citizens handle them.
+        // Or we can despawn them if we want them to disappear on disable.
+        for (Integer id : adminNPCIds) {
+            NPC npc = CitizensAPI.getNPCRegistry().getById(id);
+            if (npc != null) {
+                npc.despawn();
+            }
         }
     }
 }

@@ -1,15 +1,14 @@
 package com.npchirelingsystem.models;
 
 import com.npchirelingsystem.NPCHirelingSystem;
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.NPC;
+import net.citizensnpcs.api.trait.trait.Equipment;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Zombie;
-import org.bukkit.inventory.EntityEquipment;
-
 import org.bukkit.Material;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -22,6 +21,7 @@ public class HirelingNPC {
     private final String name;
     private final String profession;
     private final double wage;
+    private int npcId = -1;
     private UUID entityUuid;
     private Location lastLocation;
     private final Inventory inventory;
@@ -115,7 +115,14 @@ public class HirelingNPC {
     }
     
     public int getLevel() { return level; }
+    public void setLevel(int level) { this.level = level; setupMenu(); }
+    
+    public int getXp() { return xp; }
+    public void setXp(int xp) { this.xp = xp; setupMenu(); }
+    
     public int getSkillPoints() { return skillPoints; }
+    public void setSkillPoints(int skillPoints) { this.skillPoints = skillPoints; setupMenu(); }
+    
     public boolean spendSkillPoint() {
         if (skillPoints > 0) {
             skillPoints--;
@@ -125,7 +132,10 @@ public class HirelingNPC {
     }
     
     public int getDropRateUpgrade() { return dropRateUpgrade; }
+    public void setDropRateUpgrade(int dropRateUpgrade) { this.dropRateUpgrade = dropRateUpgrade; }
+    
     public int getRareDropUpgrade() { return rareDropUpgrade; }
+    public void setRareDropUpgrade(int rareDropUpgrade) { this.rareDropUpgrade = rareDropUpgrade; }
     
     public void upgradeDropRate() { dropRateUpgrade++; }
     public void upgradeRareDrop() { rareDropUpgrade++; }
@@ -133,6 +143,20 @@ public class HirelingNPC {
     public void toggleFollow() {
         this.isFollowing = !this.isFollowing;
         setupMenu(); // Update lore
+        
+        if (npcId != -1) {
+            NPC npc = CitizensAPI.getNPCRegistry().getById(npcId);
+            if (npc != null && npc.isSpawned()) {
+                if (isFollowing) {
+                    Player owner = Bukkit.getPlayer(ownerId);
+                    if (owner != null) {
+                        npc.getNavigator().setTarget(owner, true);
+                    }
+                } else {
+                    npc.getNavigator().cancelNavigation();
+                }
+            }
+        }
     }
 
     public boolean isFollowing() {
@@ -159,38 +183,44 @@ public class HirelingNPC {
     public UUID getEntityUuid() {
         return entityUuid;
     }
+    
+    public int getNpcId() {
+        return npcId;
+    }
+    
+    public void setNpcId(int npcId) {
+        this.npcId = npcId;
+    }
 
     public void spawn(Location location) {
-        if (entityUuid != null && Bukkit.getEntity(entityUuid) != null) {
-            return; // Already spawned
+        if (npcId != -1) {
+            NPC npc = CitizensAPI.getNPCRegistry().getById(npcId);
+            if (npc != null) {
+                if (!npc.isSpawned()) {
+                    npc.spawn(lastLocation != null ? lastLocation : location);
+                }
+                return;
+            }
         }
         
         Location spawnLoc = (lastLocation != null) ? lastLocation : location;
         if (spawnLoc == null) return;
 
-        LivingEntity entity = (LivingEntity) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.ZOMBIE);
-        entity.setCustomName(name + " (" + profession + ")");
-        entity.setCustomNameVisible(true);
-        entity.setAI(true); 
+        NPC npc = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, name);
+        npc.spawn(spawnLoc);
         
-        if (entity instanceof Zombie) {
-            Zombie zombie = (Zombie) entity;
-            zombie.setAdult();
-            zombie.setSilent(true);
-            // zombie.setShouldBurnInDay(false); // Removed as it might not be available
-            
-            equipNPC(zombie);
-        }
-
-        this.entityUuid = entity.getUniqueId();
+        this.npcId = npc.getId();
+        this.entityUuid = npc.getUniqueId();
         this.lastLocation = spawnLoc;
+        
+        equipNPC(npc);
     }
 
-    private void equipNPC(LivingEntity entity) {
-        EntityEquipment equipment = entity.getEquipment();
-        if (equipment == null) return;
-
-        equipment.clear();
+    private void equipNPC(NPC npc) {
+        if (!npc.hasTrait(Equipment.class)) {
+            npc.addTrait(Equipment.class);
+        }
+        Equipment equipment = npc.getTrait(Equipment.class);
         
         ItemStack helmet = null;
         ItemStack chest = null;
@@ -249,39 +279,32 @@ public class HirelingNPC {
             ItemMeta meta = helmet.getItemMeta();
             meta.setUnbreakable(true);
             helmet.setItemMeta(meta);
-            equipment.setHelmet(helmet);
+            equipment.set(Equipment.EquipmentSlot.HELMET, helmet);
         }
-        if (chest != null) equipment.setChestplate(chest);
-        if (legs != null) equipment.setLeggings(legs);
-        if (boots != null) equipment.setBoots(boots);
-        if (hand != null) equipment.setItemInMainHand(hand);
-        if (offhand != null) equipment.setItemInOffHand(offhand);
-        
-        // Ensure they don't drop items on death
-        equipment.setHelmetDropChance(0f);
-        equipment.setChestplateDropChance(0f);
-        equipment.setLeggingsDropChance(0f);
-        equipment.setBootsDropChance(0f);
-        equipment.setItemInMainHandDropChance(0f);
-        equipment.setItemInOffHandDropChance(0f);
+        if (chest != null) equipment.set(Equipment.EquipmentSlot.CHESTPLATE, chest);
+        if (legs != null) equipment.set(Equipment.EquipmentSlot.LEGGINGS, legs);
+        if (boots != null) equipment.set(Equipment.EquipmentSlot.BOOTS, boots);
+        if (hand != null) equipment.set(Equipment.EquipmentSlot.HAND, hand);
+        if (offhand != null) equipment.set(Equipment.EquipmentSlot.OFF_HAND, offhand);
     }
 
     public void despawn() {
-        if (entityUuid != null) {
-            var entity = Bukkit.getEntity(entityUuid);
-            if (entity != null) {
-                this.lastLocation = entity.getLocation(); // Save location before removing
-                entity.remove();
+        if (npcId != -1) {
+            NPC npc = CitizensAPI.getNPCRegistry().getById(npcId);
+            if (npc != null) {
+                this.lastLocation = npc.getStoredLocation();
+                npc.destroy();
             }
+            npcId = -1;
             entityUuid = null;
         }
     }
     
     public Location getLastLocation() {
-        if (entityUuid != null) {
-            var entity = Bukkit.getEntity(entityUuid);
-            if (entity != null) {
-                return entity.getLocation();
+        if (npcId != -1) {
+            NPC npc = CitizensAPI.getNPCRegistry().getById(npcId);
+            if (npc != null && npc.isSpawned()) {
+                return npc.getStoredLocation();
             }
         }
         return lastLocation;

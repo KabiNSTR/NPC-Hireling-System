@@ -51,6 +51,14 @@ public class DataManager {
                 npcData.put("wage", npc.getWage());
                 npcData.put("location", npc.getLastLocation());
                 npcData.put("inventory", npc.getInventory().getContents());
+                
+                // Skill Tree Data
+                npcData.put("level", npc.getLevel());
+                npcData.put("xp", npc.getXp());
+                npcData.put("skillPoints", npc.getSkillPoints());
+                npcData.put("dropRateUpgrade", npc.getDropRateUpgrade());
+                npcData.put("rareDropUpgrade", npc.getRareDropUpgrade());
+                
                 npcList.add(npcData);
             }
             
@@ -85,6 +93,13 @@ public class DataManager {
                     Location location = (Location) npcData.get("location");
                     
                     HirelingNPC npc = new HirelingNPC(ownerId, name, profession, wage, location);
+                    
+                    // Load Skill Tree Data
+                    if (npcData.containsKey("level")) npc.setLevel((int) npcData.get("level"));
+                    if (npcData.containsKey("xp")) npc.setXp((int) npcData.get("xp"));
+                    if (npcData.containsKey("skillPoints")) npc.setSkillPoints((int) npcData.get("skillPoints"));
+                    if (npcData.containsKey("dropRateUpgrade")) npc.setDropRateUpgrade((int) npcData.get("dropRateUpgrade"));
+                    if (npcData.containsKey("rareDropUpgrade")) npc.setRareDropUpgrade((int) npcData.get("rareDropUpgrade"));
                     
                     if (npcData.containsKey("inventory")) {
                         List<ItemStack> invList = (List<ItemStack>) npcData.get("inventory");
