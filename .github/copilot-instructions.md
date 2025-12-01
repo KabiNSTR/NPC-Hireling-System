@@ -21,3 +21,18 @@
 - [x] Implement Advanced Contracts (Categories, Quest Logic)
 - [x] Implement Admin NPCs (Manager, Command)
 - [x] Implement Skill Tree System (GUI, Data, Logic)
+
+## v2.8 Global Update (Traits System)
+- [x] Implement Citizens Traits (HirelingTrait, QuestGiverTrait)
+- [x] Refactor Interaction Logic (Remove Listeners, use Traits)
+- [x] Implement Unified Main Menu
+- [x] Update Build System (Maven) and Version Bump
+- [x] Push to GitHub
+
+## v2.9 Global Update (AI & Mechanics Overhaul)
+- [x] Implement Advanced AI in `HirelingTrait` (Following, Teleporting, Idle Looking)
+- [x] Implement Passive Resource Generation (Mining, Lumberjack, etc.)
+- [x] Implement Passive XP Gain for working NPCs
+- [x] Fix Data Persistence (Ensure Traits link to HirelingNPC on load)
+- [x] Remove obsolete `JobTask` and `LootTask` (Refactored into Trait)
+- [x] Update Version to 2.9

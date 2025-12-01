@@ -59,13 +59,11 @@ public class NPCHirelingSystem extends JavaPlugin {
         // Start wage task (every 60 seconds = 1200 ticks)
         new com.npchirelingsystem.tasks.WageTask(npcManager).runTaskTimer(this, 1200L, 1200L);
         
-        // Start job task (every 5 seconds = 100 ticks)
-        new com.npchirelingsystem.tasks.JobTask(npcManager).runTaskTimer(this, 100L, 100L);
+        // JobTask and LootTask are replaced by HirelingTrait logic in v2.9
+        // new com.npchirelingsystem.tasks.JobTask(npcManager).runTaskTimer(this, 100L, 100L);
+        // new com.npchirelingsystem.tasks.LootTask(npcManager, lootManager).runTaskTimer(this, 6000L, 6000L);
         
-        // Start loot task (every 5 minutes = 6000 ticks)
-        new com.npchirelingsystem.tasks.LootTask(npcManager, lootManager).runTaskTimer(this, 6000L, 6000L);
-        
-        getLogger().info("NPCHirelingSystem enabled! Using economy: " + economyProvider.getName());
+        getLogger().info("NPCHirelingSystem v2.9 enabled! Using economy: " + economyProvider.getName());
     }
     
     public com.npchirelingsystem.managers.ContractManager getContractManager() {
