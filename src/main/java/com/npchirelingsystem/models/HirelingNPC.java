@@ -1,5 +1,6 @@
 package com.npchirelingsystem.models;
 
+import com.npchirelingsystem.NPCHirelingSystem;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
@@ -29,7 +30,11 @@ public class HirelingNPC {
         this.name = name;
         this.profession = profession;
         this.wage = wage;
-        this.inventory = Bukkit.createInventory(null, 27, name + "'s Inventory");
+        
+        String title = NPCHirelingSystem.getLang().getRaw("npc_inventory_title").replace("%name%", name);
+        if (title.length() > 32) title = title.substring(0, 32);
+        this.inventory = Bukkit.createInventory(null, 27, title);
+        
         setupMenu();
     }
     
@@ -47,7 +52,7 @@ public class HirelingNPC {
         // Info Item
         ItemStack info = new ItemStack(Material.PAPER);
         ItemMeta infoMeta = info.getItemMeta();
-        infoMeta.setDisplayName("§eNPC Stats");
+        infoMeta.setDisplayName(NPCHirelingSystem.getLang().getRaw("npc_stats"));
         infoMeta.setLore(Arrays.asList(
             "§7Name: " + name,
             "§7Profession: " + profession,
@@ -59,8 +64,8 @@ public class HirelingNPC {
         // Fire Button
         ItemStack fire = new ItemStack(Material.RED_WOOL);
         ItemMeta fireMeta = fire.getItemMeta();
-        fireMeta.setDisplayName("§cFire NPC");
-        fireMeta.setLore(Arrays.asList("§7Click to fire this worker"));
+        fireMeta.setDisplayName(NPCHirelingSystem.getLang().getRaw("fire_npc"));
+        fireMeta.setLore(Arrays.asList(NPCHirelingSystem.getLang().getRaw("fire_lore")));
         fire.setItemMeta(fireMeta);
         inventory.setItem(26, fire);
     }

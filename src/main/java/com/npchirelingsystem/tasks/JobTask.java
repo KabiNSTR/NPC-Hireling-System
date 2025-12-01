@@ -1,5 +1,6 @@
 package com.npchirelingsystem.tasks;
 
+import com.npchirelingsystem.NPCHirelingSystem;
 import com.npchirelingsystem.managers.NPCManager;
 import com.npchirelingsystem.models.HirelingNPC;
 import org.bukkit.Bukkit;
@@ -78,26 +79,44 @@ public class JobTask extends BukkitRunnable {
     }
 
     private void doFarming(HirelingNPC npc) {
-        if (random.nextInt(100) < 10) { 
-            Material[] crops = {Material.WHEAT, Material.CARROT, Material.POTATO, Material.BEETROOT};
-            Material crop = crops[random.nextInt(crops.length)];
-            addItemToStorage(npc, new ItemStack(crop, 1));
+        int chance = NPCHirelingSystem.getInstance().getConfig().getInt("jobs.farmer.chance", 10);
+        if (random.nextInt(100) < chance) { 
+            List<String> items = NPCHirelingSystem.getInstance().getConfig().getStringList("jobs.farmer.items");
+            if (items.isEmpty()) items = List.of("WHEAT", "CARROT", "POTATO");
+            
+            String matName = items.get(random.nextInt(items.size()));
+            Material mat = Material.getMaterial(matName);
+            if (mat != null) {
+                addItemToStorage(npc, new ItemStack(mat, 1));
+            }
         }
     }
 
     private void doMining(HirelingNPC npc) {
-        if (random.nextInt(100) < 5) { 
-            Material[] ores = {Material.COBBLESTONE, Material.COAL, Material.RAW_IRON, Material.RAW_COPPER};
-            Material ore = ores[random.nextInt(ores.length)];
-            addItemToStorage(npc, new ItemStack(ore, 1));
+        int chance = NPCHirelingSystem.getInstance().getConfig().getInt("jobs.miner.chance", 5);
+        if (random.nextInt(100) < chance) { 
+            List<String> items = NPCHirelingSystem.getInstance().getConfig().getStringList("jobs.miner.items");
+            if (items.isEmpty()) items = List.of("COBBLESTONE", "COAL");
+
+            String matName = items.get(random.nextInt(items.size()));
+            Material mat = Material.getMaterial(matName);
+            if (mat != null) {
+                addItemToStorage(npc, new ItemStack(mat, 1));
+            }
         }
     }
     
     private void doHunting(HirelingNPC npc, Entity entity) {
-         if (random.nextInt(100) < 5) {
-             Material[] food = {Material.BEEF, Material.PORKCHOP, Material.CHICKEN, Material.LEATHER};
-             Material item = food[random.nextInt(food.length)];
-             addItemToStorage(npc, new ItemStack(item, 1));
+         int chance = NPCHirelingSystem.getInstance().getConfig().getInt("jobs.hunter.chance", 5);
+         if (random.nextInt(100) < chance) {
+             List<String> items = NPCHirelingSystem.getInstance().getConfig().getStringList("jobs.hunter.items");
+             if (items.isEmpty()) items = List.of("BEEF", "PORKCHOP");
+
+             String matName = items.get(random.nextInt(items.size()));
+             Material mat = Material.getMaterial(matName);
+             if (mat != null) {
+                 addItemToStorage(npc, new ItemStack(mat, 1));
+             }
          }
     }
 

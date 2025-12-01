@@ -1,5 +1,6 @@
 package com.npchirelingsystem.listeners;
 
+import com.npchirelingsystem.NPCHirelingSystem;
 import com.npchirelingsystem.managers.NPCManager;
 import com.npchirelingsystem.models.HirelingNPC;
 import org.bukkit.entity.Entity;
@@ -31,7 +32,7 @@ public class NPCInteractionListener implements Listener {
                 
                 // Check ownership
                 if (!npc.getOwnerId().equals(player.getUniqueId()) && !player.hasPermission("npchirelingsystem.admin")) {
-                    player.sendMessage("§cThis is not your hireling!");
+                    player.sendMessage(NPCHirelingSystem.getLang().get("not_your_hireling"));
                     return;
                 }
                 

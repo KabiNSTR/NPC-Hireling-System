@@ -47,7 +47,7 @@ public class GUIListener implements Listener {
                     for (HirelingNPC npc : npcManager.getAllHirelings()) {
                         if (npc.getInventory().equals(event.getClickedInventory())) {
                             npcManager.fireNPC(npc);
-                            player.sendMessage("§cYou have fired your hireling.");
+                            player.sendMessage(NPCHirelingSystem.getLang().get("fire_success"));
                             player.closeInventory();
                             return;
                         }

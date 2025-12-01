@@ -1,1 +1,25 @@
-language: ru
+lang: en
+
+# Job Settings
+jobs:
+  farmer:
+    chance: 10 # Percentage chance per 5 seconds
+    items:
+      - WHEAT
+      - CARROT
+      - POTATO
+      - BEETROOT
+  miner:
+    chance: 5
+    items:
+      - COBBLESTONE
+      - COAL
+      - RAW_IRON
+      - RAW_COPPER
+  hunter:
+    chance: 5
+    items:
+      - BEEF
+      - PORKCHOP
+      - CHICKEN
+      - LEATHER
