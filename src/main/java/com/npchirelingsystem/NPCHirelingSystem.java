@@ -19,6 +19,7 @@ public class NPCHirelingSystem extends JavaPlugin {
     private static EconomyProvider economyProvider;
     private static NPCHirelingSystem instance;
     private static LanguageManager languageManager;
+    private static com.npchirelingsystem.managers.LootManager lootManager;
     private NPCManager npcManager;
     private com.npchirelingsystem.managers.ContractManager contractManager;
 
@@ -36,6 +37,7 @@ public class NPCHirelingSystem extends JavaPlugin {
         this.npcManager.loadAll();
         
         this.contractManager = new com.npchirelingsystem.managers.ContractManager();
+        lootManager = new com.npchirelingsystem.managers.LootManager(this);
         
         // Register commands and events here
         getCommand("hire").setExecutor(new HireCommand());
@@ -51,6 +53,9 @@ public class NPCHirelingSystem extends JavaPlugin {
         
         // Start job task (every 5 seconds = 100 ticks)
         new com.npchirelingsystem.tasks.JobTask(npcManager).runTaskTimer(this, 100L, 100L);
+        
+        // Start loot task (every 5 minutes = 6000 ticks)
+        new com.npchirelingsystem.tasks.LootTask(npcManager, lootManager).runTaskTimer(this, 6000L, 6000L);
         
         getLogger().info("NPCHirelingSystem enabled! Using economy: " + economyProvider.getName());
     }
@@ -93,5 +98,9 @@ public class NPCHirelingSystem extends JavaPlugin {
     
     public static LanguageManager getLang() {
         return languageManager;
+    }
+    
+    public static com.npchirelingsystem.managers.LootManager getLootManager() {
+        return lootManager;
     }
 }

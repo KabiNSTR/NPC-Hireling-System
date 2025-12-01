@@ -1,9 +1,9 @@
 package com.npchirelingsystem.gui;
 
 import com.npchirelingsystem.NPCHirelingSystem;
+import com.npchirelingsystem.managers.LootManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -19,13 +19,12 @@ public class LootEditorGUI {
         String title = "Loot Editor: Select Job";
         Inventory inv = Bukkit.createInventory(null, 27, title);
 
-        ItemStack miner = createItem(Material.IRON_PICKAXE, "miner");
-        ItemStack farmer = createItem(Material.IRON_HOE, "farmer");
-        ItemStack hunter = createItem(Material.BOW, "hunter");
-
-        inv.setItem(11, miner);
-        inv.setItem(13, farmer);
-        inv.setItem(15, hunter);
+        inv.setItem(10, createItem(Material.IRON_PICKAXE, "miner"));
+        inv.setItem(11, createItem(Material.IRON_HOE, "farmer"));
+        inv.setItem(12, createItem(Material.BOW, "hunter"));
+        inv.setItem(13, createItem(Material.IRON_AXE, "lumberjack"));
+        inv.setItem(14, createItem(Material.FISHING_ROD, "fisherman"));
+        inv.setItem(15, createItem(Material.IRON_SWORD, "guard"));
         
         ItemStack back = new ItemStack(Material.ARROW);
         ItemMeta backMeta = back.getItemMeta();
@@ -47,36 +46,29 @@ public class LootEditorGUI {
     public static void openEditor(Player player, String job) {
         String title = NPCHirelingSystem.getLang().getRaw("loot_gui_title").replace("%job%", job);
         Inventory inv = Bukkit.createInventory(null, 54, title);
-        FileConfiguration config = NPCHirelingSystem.getInstance().getConfig();
+        
+        LootManager lootManager = NPCHirelingSystem.getLootManager();
+        List<LootManager.LootItem> items = lootManager.getLootTable(job);
 
-        // Chance Item
-        int chance = config.getInt("jobs." + job + ".chance", 10);
-        ItemStack chanceItem = new ItemStack(Material.EXPERIENCE_BOTTLE);
-        ItemMeta chanceMeta = chanceItem.getItemMeta();
-        chanceMeta.setDisplayName(NPCHirelingSystem.getLang().getRaw("loot_chance").replace("%chance%", String.valueOf(chance)));
-        chanceMeta.setLore(Arrays.asList(NPCHirelingSystem.getLang().getRaw("wage_click_change")));
-        chanceItem.setItemMeta(chanceMeta);
-        inv.setItem(49, chanceItem);
-
-        // Load Items
-        List<String> items = config.getStringList("jobs." + job + ".items");
-        for (String matName : items) {
-            Material mat = Material.getMaterial(matName);
-            if (mat != null) {
-                ItemStack item = new ItemStack(mat);
-                ItemMeta meta = item.getItemMeta();
-                List<String> lore = new ArrayList<>();
-                lore.add(NPCHirelingSystem.getLang().getRaw("loot_click_remove"));
-                meta.setLore(lore);
-                item.setItemMeta(meta);
-                inv.addItem(item);
-            }
+        for (LootManager.LootItem lootItem : items) {
+            ItemStack item = new ItemStack(lootItem.material);
+            ItemMeta meta = item.getItemMeta();
+            List<String> lore = new ArrayList<>();
+            lore.add("§7Min: §f" + lootItem.min);
+            lore.add("§7Max: §f" + lootItem.max);
+            lore.add("§7Chance: §f" + lootItem.chance + "%");
+            lore.add("§eLeft-Click to Edit");
+            lore.add("§cRight-Click to Remove");
+            meta.setLore(lore);
+            item.setItemMeta(meta);
+            inv.addItem(item);
         }
         
         // Info/Add Hint
         ItemStack info = new ItemStack(Material.PAPER);
         ItemMeta infoMeta = info.getItemMeta();
         infoMeta.setDisplayName(NPCHirelingSystem.getLang().getRaw("loot_add_item"));
+        infoMeta.setLore(Arrays.asList("§7Click items in your inventory", "§7to add them to the loot table."));
         info.setItemMeta(infoMeta);
         inv.setItem(53, info);
         
