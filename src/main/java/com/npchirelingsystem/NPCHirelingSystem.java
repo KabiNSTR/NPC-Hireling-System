@@ -1,8 +1,10 @@
 package com.npchirelingsystem;
 
+import com.npchirelingsystem.commands.HireCommand;
 import com.npchirelingsystem.economy.EconomyProvider;
 import com.npchirelingsystem.economy.InternalEconomyProvider;
 import com.npchirelingsystem.economy.VaultEconomyProvider;
+import com.npchirelingsystem.managers.NPCManager;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -14,6 +16,7 @@ public class NPCHirelingSystem extends JavaPlugin {
     private static final Logger log = Logger.getLogger("Minecraft");
     private static EconomyProvider economyProvider;
     private static NPCHirelingSystem instance;
+    private NPCManager npcManager;
 
     @Override
     public void onEnable() {
@@ -21,8 +24,14 @@ public class NPCHirelingSystem extends JavaPlugin {
         
         setupEconomy();
         
+        this.npcManager = new NPCManager();
+        
         // Register commands and events here
-        // getCommand("hire").setExecutor(new HireCommand());
+        getCommand("hire").setExecutor(new HireCommand());
+        getServer().getPluginManager().registerEvents(new com.npchirelingsystem.gui.GUIListener(npcManager), this);
+        
+        // Start wage task (every 60 seconds = 1200 ticks)
+        new com.npchirelingsystem.tasks.WageTask(npcManager).runTaskTimer(this, 1200L, 1200L);
         
         getLogger().info("NPCHirelingSystem enabled! Using economy: " + economyProvider.getName());
     }
