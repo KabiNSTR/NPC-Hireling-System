@@ -146,7 +146,7 @@ public class GUIListener implements Listener {
                 }
             }
         } else if (item.getType() == Material.ARROW) {
-            MainMenuGUI.open(player, true);
+            MainMenuGUI.open(player, false);
         }
     }
     
@@ -155,8 +155,17 @@ public class GUIListener implements Listener {
         if (event.getCurrentItem() == null) return;
         Player player = (Player) event.getWhoClicked();
         String title = event.getView().getTitle();
-        String catName = title.replace("Contracts: ", "");
-        ContractManager.ContractCategory category = ContractManager.ContractCategory.valueOf(catName);
+        String prefix = NPCHirelingSystem.getLang().getRaw("contracts_prefix");
+        String catName = title.replace(prefix, "");
+        
+        // Safety check in case the title doesn't match for some reason (e.g. color codes stripping issues)
+        ContractManager.ContractCategory category;
+        try {
+            category = ContractManager.ContractCategory.valueOf(catName);
+        } catch (IllegalArgumentException e) {
+            // Fallback or return if we can't parse category
+            return;
+        }
         
         int slot = event.getSlot();
         
@@ -164,7 +173,11 @@ public class GUIListener implements Listener {
         if (slot == 0) ContractGUI.open(player, contractManager, ContractManager.ContractCategory.GATHERING);
         else if (slot == 1) ContractGUI.open(player, contractManager, ContractManager.ContractCategory.HUNTING);
         else if (slot == 2) ContractGUI.open(player, contractManager, ContractManager.ContractCategory.LEGENDARY);
-        else if (slot == 44) MainMenuGUI.open(player, true);
+        else if (slot == 40) {
+            NPCHirelingSystem.getQuestManager().claimReward(player);
+            player.closeInventory();
+        }
+        else if (slot == 44) MainMenuGUI.open(player, false);
         
         // Contracts
         List<Contract> contracts = contractManager.getContracts(category);

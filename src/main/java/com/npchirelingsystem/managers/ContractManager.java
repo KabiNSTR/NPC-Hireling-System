@@ -91,16 +91,10 @@ public class ContractManager {
                         .replace("%item%", contract.material.name()));
             }
             return;
-        } else if (contract.type == ContractType.MOB_KILL) {
-            Location target = player.getLocation().add(random.nextInt(2000)-1000, 0, random.nextInt(2000)-1000);
-            target.setY(target.getWorld().getHighestBlockYAt(target) + 1);
-            NPCHirelingSystem.getQuestManager().startKillQuest(player, target, contract.amount);
-        } else if (contract.type == ContractType.LEGENDARY_DELIVERY) {
-            Location target = player.getLocation().add(random.nextInt(2000)-1000, 0, random.nextInt(2000)-1000);
-            target.setY(target.getWorld().getHighestBlockYAt(target) + 1);
-            NPCHirelingSystem.getQuestManager().startLegendaryQuest(player, target);
+        } else if (contract.type == ContractType.MOB_KILL || contract.type == ContractType.LEGENDARY_DELIVERY) {
+            NPCHirelingSystem.getQuestManager().startQuest(player, contract);
         }
-        player.sendMessage(NPCHirelingSystem.getLang().get("contract_accepted").replace("%description%", contract.description));
+        // player.sendMessage(NPCHirelingSystem.getLang().get("contract_accepted").replace("%description%", contract.description));
     }
 
     public static class Contract {

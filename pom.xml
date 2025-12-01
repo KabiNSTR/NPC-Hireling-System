@@ -6,7 +6,7 @@
 
     <groupId>com.npchirelingsystem</groupId>
     <artifactId>NPCHirelingSystem</artifactId>
-    <version>3.1</version>
+    <version>3.2</version>
     <packaging>jar</packaging>
 
     <name>NPCHirelingSystem</name>

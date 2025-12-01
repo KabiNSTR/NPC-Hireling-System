@@ -19,16 +19,15 @@ com\npchirelingsystem\economy\EconomyProvider.class
 com\npchirelingsystem\managers\LootManager$LootItem.class
 com\npchirelingsystem\managers\QuestManager.class
 com\npchirelingsystem\managers\ContractManager$ContractCategory.class
-com\npchirelingsystem\managers\QuestManager$2.class
 com\npchirelingsystem\commands\AdminCommand.class
 com\npchirelingsystem\managers\ContractManager$Contract.class
 com\npchirelingsystem\traits\HirelingTrait.class
 com\npchirelingsystem\listeners\PlayerListener.class
 com\npchirelingsystem\tasks\WageTask.class
+com\npchirelingsystem\gui\MyHirelingsGUI.class
 com\npchirelingsystem\managers\AdminNPCManager.class
 com\npchirelingsystem\traits\QuestGiverTrait.class
 com\npchirelingsystem\gui\GUIListener.class
-com\npchirelingsystem\managers\QuestManager$QuestType.class
 com\npchirelingsystem\utils\LanguageManager.class
 com\npchirelingsystem\gui\AdminGUI.class
 com\npchirelingsystem\listeners\NPCInteractionListener.class

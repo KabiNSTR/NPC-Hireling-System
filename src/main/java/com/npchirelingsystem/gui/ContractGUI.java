@@ -57,6 +57,23 @@ public class ContractGUI {
         back.setItemMeta(backMeta);
         inv.setItem(44, back);
 
+        // Quest Status / Claim Reward
+        if (NPCHirelingSystem.getQuestManager().isQuestCompleted(player)) {
+            ItemStack claim = new ItemStack(Material.GOLD_BLOCK);
+            ItemMeta meta = claim.getItemMeta();
+            meta.setDisplayName("§6§lClaim Reward");
+            meta.setLore(Arrays.asList("§7Click to claim your reward!"));
+            claim.setItemMeta(meta);
+            inv.setItem(40, claim);
+        } else if (NPCHirelingSystem.getQuestManager().hasActiveQuest(player)) {
+            ItemStack status = new ItemStack(Material.COMPASS);
+            ItemMeta meta = status.getItemMeta();
+            meta.setDisplayName("§eQuest in Progress");
+            meta.setLore(Arrays.asList("§7Check your chat for details."));
+            status.setItemMeta(meta);
+            inv.setItem(40, status);
+        }
+
         player.openInventory(inv);
     }
     
