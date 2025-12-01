@@ -21,6 +21,9 @@ public class InternalEconomyProvider implements EconomyProvider {
     }
 
     private void setupFile() {
+        if (!plugin.getDataFolder().exists()) {
+            plugin.getDataFolder().mkdirs();
+        }
         balancesFile = new File(plugin.getDataFolder(), "balances.yml");
         if (!balancesFile.exists()) {
             try {
