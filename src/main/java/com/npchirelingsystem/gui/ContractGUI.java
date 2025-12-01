@@ -17,12 +17,12 @@ import java.util.List;
 public class ContractGUI {
 
     public static void open(Player player, ContractManager manager, ContractCategory category) {
-        Inventory inv = Bukkit.createInventory(null, 45, "Contracts: " + category.name());
+        Inventory inv = Bukkit.createInventory(null, 45, NPCHirelingSystem.getLang().getRaw("contracts_prefix") + category.name());
 
         // Category Tabs
-        inv.setItem(0, createTab(Material.IRON_PICKAXE, "Gathering", category == ContractCategory.GATHERING));
-        inv.setItem(1, createTab(Material.IRON_SWORD, "Hunting", category == ContractCategory.HUNTING));
-        inv.setItem(2, createTab(Material.NETHER_STAR, "Legendary", category == ContractCategory.LEGENDARY));
+        inv.setItem(0, createTab(Material.IRON_PICKAXE, NPCHirelingSystem.getLang().getRaw("contract_tab_gathering"), category == ContractCategory.GATHERING));
+        inv.setItem(1, createTab(Material.IRON_SWORD, NPCHirelingSystem.getLang().getRaw("contract_tab_hunting"), category == ContractCategory.HUNTING));
+        inv.setItem(2, createTab(Material.NETHER_STAR, NPCHirelingSystem.getLang().getRaw("contract_tab_legendary"), category == ContractCategory.LEGENDARY));
 
         List<Contract> contracts = manager.getContracts(category);
         
@@ -37,12 +37,13 @@ public class ContractGUI {
             
             ItemStack item = new ItemStack(icon);
             ItemMeta meta = item.getItemMeta();
-            meta.setDisplayName("§6" + c.description);
+            meta.setDisplayName(NPCHirelingSystem.getLang().getRaw("contract_item_name").replace("%type%", c.type.name()));
             meta.setLore(Arrays.asList(
-                "§7Type: §f" + c.type.name(),
-                "§7Reward: §e" + String.format("%.2f", c.reward) + " coins",
+                NPCHirelingSystem.getLang().getRaw("contract_lore_type").replace("%type%", c.type.name()),
+                NPCHirelingSystem.getLang().getRaw("contract_lore_desc").replace("%desc%", c.description),
+                NPCHirelingSystem.getLang().getRaw("contract_lore_reward").replace("%reward%", String.format("%.2f", c.reward)),
                 "",
-                "§aClick to Accept!"
+                NPCHirelingSystem.getLang().getRaw("contract_lore_click")
             ));
             item.setItemMeta(meta);
             

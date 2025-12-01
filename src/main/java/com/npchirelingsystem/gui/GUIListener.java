@@ -56,6 +56,8 @@ public class GUIListener implements Listener {
             handleContractClick(event);
         } else if (title.startsWith(NPCHirelingSystem.getLang().getRaw("skill_tree_prefix"))) {
             handleSkillTreeClick(event);
+        } else if (title.equals(NPCHirelingSystem.getLang().getRaw("my_hirelings_title"))) {
+            handleMyHirelingsClick(event);
         } else {
             // Check if it's an NPC inventory by checking the inventory object directly
             // This avoids localization issues with titles
@@ -119,12 +121,32 @@ public class GUIListener implements Listener {
         if (item.getType() == Material.EMERALD) {
             HiringGUI.open(player);
         } else if (item.getType() == Material.BOOK) {
-            // Open list of hirelings (Not implemented yet, maybe just chat list or new GUI)
-            player.sendMessage("§eUse /hire to see your hirelings via chat for now.");
+            MyHirelingsGUI.open(player, npcManager);
         } else if (item.getType() == Material.PAPER) {
-            ContractGUI.open(player, contractManager);
+            ContractGUI.open(player, contractManager, ContractManager.ContractCategory.GATHERING);
         } else if (item.getType() == Material.COMMAND_BLOCK) {
             AdminGUI.open(player, npcManager);
+        }
+    }
+
+    private void handleMyHirelingsClick(InventoryClickEvent event) {
+        event.setCancelled(true);
+        if (event.getCurrentItem() == null) return;
+        Player player = (Player) event.getWhoClicked();
+        ItemStack item = event.getCurrentItem();
+        
+        if (item.getType() == Material.PLAYER_HEAD) {
+            // We need to find the NPC by name and owner. 
+            // Since the name in item might be formatted, it's safer to store UUID in NBT or just iterate carefully.
+            // For simplicity, let's iterate and match name.
+            for (HirelingNPC npc : npcManager.getHirelings(player.getUniqueId())) {
+                if (item.getItemMeta().getDisplayName().contains(npc.getName())) {
+                    player.openInventory(npc.getInventory());
+                    return;
+                }
+            }
+        } else if (item.getType() == Material.ARROW) {
+            MainMenuGUI.open(player, true);
         }
     }
     

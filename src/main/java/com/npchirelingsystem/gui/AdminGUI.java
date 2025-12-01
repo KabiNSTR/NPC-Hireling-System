@@ -4,6 +4,7 @@ import com.npchirelingsystem.NPCHirelingSystem;
 import com.npchirelingsystem.managers.NPCManager;
 import com.npchirelingsystem.models.HirelingNPC;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -38,12 +39,23 @@ public class AdminGUI {
             if (owner != null) ownerName = owner.getName();
             else ownerName = Bukkit.getOfflinePlayer(npc.getOwnerId()).getName();
 
+            Location loc = npc.getLastLocation();
+            String x = "0", y = "0", z = "0";
+            if (loc != null) {
+                x = String.valueOf(loc.getBlockX());
+                y = String.valueOf(loc.getBlockY());
+                z = String.valueOf(loc.getBlockZ());
+            }
+
             ItemStack head = createItem(Material.PLAYER_HEAD, 
-                "§e" + npc.getName(), 
-                "§7Owner: §f" + ownerName,
-                "§7Profession: §f" + npc.getProfession(),
-                "§7Wage: §6" + npc.getWage(),
-                "§cClick to FIRE"
+                NPCHirelingSystem.getLang().getRaw("admin_npc_name").replace("%name%", npc.getName()), 
+                NPCHirelingSystem.getLang().getRaw("admin_npc_owner").replace("%owner%", ownerName),
+                NPCHirelingSystem.getLang().getRaw("admin_npc_profession").replace("%profession%", npc.getProfession()),
+                NPCHirelingSystem.getLang().getRaw("admin_npc_status").replace("%status%", npc.isFollowing() ? NPCHirelingSystem.getLang().getRaw("status_following") : NPCHirelingSystem.getLang().getRaw("status_stationary")),
+                NPCHirelingSystem.getLang().getRaw("admin_npc_location").replace("%x%", x).replace("%y%", y).replace("%z%", z),
+                "",
+                NPCHirelingSystem.getLang().getRaw("admin_npc_click_teleport"),
+                NPCHirelingSystem.getLang().getRaw("admin_npc_click_delete")
             );
             inv.setItem(slot++, head);
         }

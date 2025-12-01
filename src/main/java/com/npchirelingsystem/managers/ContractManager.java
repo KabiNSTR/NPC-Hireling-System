@@ -64,14 +64,18 @@ public class ContractManager {
             if (mat == Material.EMERALD) reward *= 25;
             if (mat == Material.GOLD_ORE) reward *= 5;
             
-            return new Contract(ContractType.ITEM_DELIVERY, "Gather " + amount + " " + mat.name(), mat, amount, reward);
+            return new Contract(ContractType.ITEM_DELIVERY, NPCHirelingSystem.getLang().getRaw("contract_desc_gather")
+                    .replace("%amount%", String.valueOf(amount))
+                    .replace("%item%", mat.name()), mat, amount, reward);
         } else if (category == ContractCategory.HUNTING) {
             String[] mobs = {"Zombie", "Skeleton", "Spider", "Creeper", "Enderman"};
             String mob = mobs[random.nextInt(mobs.length)];
             int amount = 5 + random.nextInt(15);
-            return new Contract(ContractType.MOB_KILL, "Kill " + amount + " " + mob + "s", null, amount, amount * 25.0);
+            return new Contract(ContractType.MOB_KILL, NPCHirelingSystem.getLang().getRaw("contract_desc_kill")
+                    .replace("%amount%", String.valueOf(amount))
+                    .replace("%mob%", mob), null, amount, amount * 25.0);
         } else {
-            return new Contract(ContractType.LEGENDARY_DELIVERY, "Deliver Secret Package to Remote Outpost", Material.PAPER, 1, 1000.0 + random.nextInt(2000));
+            return new Contract(ContractType.LEGENDARY_DELIVERY, NPCHirelingSystem.getLang().getRaw("contract_desc_legendary"), Material.PAPER, 1, 1000.0 + random.nextInt(2000));
         }
     }
 

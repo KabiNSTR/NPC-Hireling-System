@@ -95,3 +95,41 @@ follow_toggle_msg: "&eNPC Follow Mode: %status%"
 npc_inventory_title_suffix: "'s Inventory"
 contracts_prefix: "Contracts: "
 skill_tree_prefix: "Skill Tree: "
+
+# My Hirelings GUI
+my_hirelings_title: "My Hirelings"
+no_hirelings: "&cYou have no hirelings."
+hireling_item_name: "&e%name%"
+hireling_item_lore_profession: "&7Profession: &f%profession%"
+hireling_item_lore_level: "&7Level: &a%level%"
+hireling_item_lore_xp: "&7XP: &b%xp%/%max%"
+hireling_item_lore_status: "&7Status: %status%"
+hireling_item_lore_location: "&7Location: %x%, %y%, %z%"
+hireling_item_lore_click: "&eClick to manage"
+
+# Admin GUI
+admin_npc_name: "&e%name%"
+admin_npc_owner: "&7Owner: &f%owner%"
+admin_npc_profession: "&7Profession: &f%profession%"
+admin_npc_status: "&7Status: %status%"
+admin_npc_location: "&7Location: %x%, %y%, %z%"
+admin_npc_click_teleport: "&aLeft-Click to Teleport"
+admin_npc_click_delete: "&cRight-Click to Delete"
+
+# Contract GUI
+contract_gui_title: "Contracts Board"
+contract_tab_gathering: "&aGathering Contracts"
+contract_tab_hunting: "&cHunting Contracts"
+contract_tab_legendary: "&6Legendary Contracts"
+contract_item_name: "&e%type%"
+contract_lore_type: "&7Type: &f%type%"
+contract_lore_desc: "&7Task: &f%desc%"
+contract_lore_reward: "&7Reward: &6%reward%"
+contract_lore_click: "&eClick to Accept"
+contract_refresh_name: "&bRefresh Contracts"
+contract_refresh_lore: "&7Click to get new contracts"
+
+# Contract Descriptions
+contract_desc_gather: "Gather %amount% %item%"
+contract_desc_kill: "Kill %amount% %mob%s"
+contract_desc_legendary: "Deliver Secret Package to Remote Outpost"
