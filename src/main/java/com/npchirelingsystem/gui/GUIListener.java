@@ -10,6 +10,16 @@ import org.bukkit.inventory.ItemStack;
 
 import com.npchirelingsystem.models.HirelingNPC;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class GUIListener implements Listener {
 
@@ -24,16 +34,150 @@ public class GUIListener implements Listener {
         String title = event.getView().getTitle();
         String hireTitle = NPCHirelingSystem.getLang().getRaw("hire_gui_title");
         String adminTitle = NPCHirelingSystem.getLang().getRaw("admin_gui_title");
-
+        String settingsTitle = NPCHirelingSystem.getLang().getRaw("settings_gui_title");
+        String wageTitle = NPCHirelingSystem.getLang().getRaw("wage_gui_title");
+        
         if (title.equals(hireTitle)) {
             handleHireClick(event);
         } else if (title.equals(adminTitle)) {
             handleAdminClick(event);
+        } else if (title.equals(settingsTitle)) {
+            handleSettingsClick(event);
+        } else if (title.equals(wageTitle)) {
+            handleWageEditClick(event);
+        } else if (title.startsWith("Loot Editor: ")) {
+            handleLootEditClick(event);
+        } else if (title.equals("Loot Editor: Select Job")) {
+            handleLootJobSelect(event);
         } else if (title.endsWith("'s Inventory")) {
             handleNPCMenuClick(event);
         }
     }
     
+    private void handleSettingsClick(InventoryClickEvent event) {
+        event.setCancelled(true);
+        if (event.getCurrentItem() == null) return;
+        Player player = (Player) event.getWhoClicked();
+        ItemStack item = event.getCurrentItem();
+        
+        if (item.getType() == Material.BOOK) { // Language
+            String current = NPCHirelingSystem.getInstance().getConfig().getString("lang", "en");
+            String next = current.equals("en") ? "ru" : "en";
+            NPCHirelingSystem.getInstance().getConfig().set("lang", next);
+            NPCHirelingSystem.getInstance().saveConfig();
+            NPCHirelingSystem.getInstance().reloadPlugin();
+            SettingsGUI.open(player); // Re-open to update text
+        } else if (item.getType() == Material.GOLD_INGOT) { // Wages
+            WageEditorGUI.open(player);
+        } else if (item.getType() == Material.CHEST) { // Loot
+            LootEditorGUI.openJobSelector(player);
+        } else if (item.getType() == Material.ARROW) { // Back
+            AdminGUI.open(player, npcManager);
+        }
+    }
+    
+    private void handleWageEditClick(InventoryClickEvent event) {
+        event.setCancelled(true);
+        if (event.getCurrentItem() == null) return;
+        Player player = (Player) event.getWhoClicked();
+        ItemStack item = event.getCurrentItem();
+        
+        if (item.getType() == Material.ARROW) {
+            SettingsGUI.open(player);
+            return;
+        }
+        
+        String job = null;
+        if (item.getType() == Material.IRON_PICKAXE) job = "miner";
+        else if (item.getType() == Material.IRON_SWORD) job = "guard";
+        else if (item.getType() == Material.IRON_HOE) job = "farmer";
+        else if (item.getType() == Material.BOW) job = "hunter";
+        
+        if (job != null) {
+            FileConfiguration config = NPCHirelingSystem.getInstance().getConfig();
+            double current = config.getDouble("wages." + job, 10.0);
+            
+            if (event.isLeftClick()) current += 1.0;
+            else if (event.isRightClick()) current -= 1.0;
+            
+            if (current < 0) current = 0;
+            
+            config.set("wages." + job, current);
+            NPCHirelingSystem.getInstance().saveConfig();
+            WageEditorGUI.open(player); // Refresh
+        }
+    }
+    
+    private void handleLootJobSelect(InventoryClickEvent event) {
+        event.setCancelled(true);
+        if (event.getCurrentItem() == null) return;
+        Player player = (Player) event.getWhoClicked();
+        ItemStack item = event.getCurrentItem();
+        
+        if (item.getType() == Material.ARROW) {
+            SettingsGUI.open(player);
+            return;
+        }
+        
+        String name = item.getItemMeta().getDisplayName();
+        if (name.contains("miner")) LootEditorGUI.openEditor(player, "miner");
+        else if (name.contains("farmer")) LootEditorGUI.openEditor(player, "farmer");
+        else if (name.contains("hunter")) LootEditorGUI.openEditor(player, "hunter");
+    }
+    
+    private void handleLootEditClick(InventoryClickEvent event) {
+        event.setCancelled(true);
+        Player player = (Player) event.getWhoClicked();
+        String title = event.getView().getTitle();
+        String job = title.replace("Loot Editor: ", "");
+        
+        if (event.getClickedInventory() == event.getView().getTopInventory()) {
+            ItemStack item = event.getCurrentItem();
+            if (item == null) return;
+            
+            if (item.getType() == Material.ARROW) {
+                LootEditorGUI.openJobSelector(player);
+                return;
+            }
+            
+            if (item.getType() == Material.EXPERIENCE_BOTTLE) {
+                FileConfiguration config = NPCHirelingSystem.getInstance().getConfig();
+                int chance = config.getInt("jobs." + job + ".chance", 10);
+                if (event.isLeftClick()) chance += 1;
+                else if (event.isRightClick()) chance -= 1;
+                if (chance < 0) chance = 0;
+                if (chance > 100) chance = 100;
+                config.set("jobs." + job + ".chance", chance);
+                NPCHirelingSystem.getInstance().saveConfig();
+                LootEditorGUI.openEditor(player, job);
+                return;
+            }
+            
+            // Remove item
+            if (item.getType() != Material.PAPER && item.getType() != Material.AIR) {
+                FileConfiguration config = NPCHirelingSystem.getInstance().getConfig();
+                List<String> items = config.getStringList("jobs." + job + ".items");
+                items.remove(item.getType().name());
+                config.set("jobs." + job + ".items", items);
+                NPCHirelingSystem.getInstance().saveConfig();
+                LootEditorGUI.openEditor(player, job);
+            }
+        } else {
+            // Add item from player inventory
+            ItemStack item = event.getCurrentItem();
+            if (item != null && item.getType() != Material.AIR) {
+                FileConfiguration config = NPCHirelingSystem.getInstance().getConfig();
+                List<String> items = config.getStringList("jobs." + job + ".items");
+                if (!items.contains(item.getType().name())) {
+                    items.add(item.getType().name());
+                    config.set("jobs." + job + ".items", items);
+                    NPCHirelingSystem.getInstance().saveConfig();
+                    LootEditorGUI.openEditor(player, job);
+                }
+            }
+        }
+    }
+
     private void handleNPCMenuClick(InventoryClickEvent event) {
         if (event.getClickedInventory() == event.getView().getTopInventory()) {
             int slot = event.getSlot();
@@ -81,13 +225,18 @@ public class GUIListener implements Listener {
         String minerName = NPCHirelingSystem.getLang().getRaw("npc_miner");
         String guardName = NPCHirelingSystem.getLang().getRaw("npc_guard");
         String farmerName = NPCHirelingSystem.getLang().getRaw("npc_farmer");
+        
+        FileConfiguration config = NPCHirelingSystem.getInstance().getConfig();
 
         if (name.equals(minerName)) {
-            npcManager.hireNPC(player, "ARMORER", 10.0);
+            double wage = config.getDouble("wages.miner", 10.0);
+            npcManager.hireNPC(player, "ARMORER", wage);
         } else if (name.equals(guardName)) {
-            npcManager.hireNPC(player, "WEAPONSMITH", 15.0);
+            double wage = config.getDouble("wages.guard", 15.0);
+            npcManager.hireNPC(player, "WEAPONSMITH", wage);
         } else if (name.equals(farmerName)) {
-            npcManager.hireNPC(player, "FARMER", 8.0);
+            double wage = config.getDouble("wages.farmer", 8.0);
+            npcManager.hireNPC(player, "FARMER", wage);
         }
         
         player.closeInventory();
@@ -109,11 +258,13 @@ public class GUIListener implements Listener {
             return;
         }
         
+        if (name.equals(NPCHirelingSystem.getLang().getRaw("admin_settings"))) {
+            SettingsGUI.open(player);
+            return;
+        }
+        
         // Handle firing logic (simple check if it's a head)
         if (item.getType() == org.bukkit.Material.PLAYER_HEAD) {
-            // Find NPC by name in lore or similar (simplified for now, ideally store UUID in NBT)
-            // For this example, we just reload the GUI to simulate action or fire the first matching
-            // In a real plugin, use PersistentDataContainer to store NPC UUID on the item
             player.sendMessage("§cFeature to fire specific NPC via GUI is coming soon! Use command.");
         }
     }

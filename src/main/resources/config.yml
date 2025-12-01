@@ -1,5 +1,12 @@
 lang: en
 
+# Economy Settings (Wages per minute)
+wages:
+  miner: 10.0
+  guard: 15.0
+  farmer: 8.0
+  hunter: 12.0
+
 # Job Settings
 jobs:
   farmer:

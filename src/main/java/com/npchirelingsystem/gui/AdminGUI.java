@@ -21,7 +21,11 @@ public class AdminGUI {
 
         // Reload Button
         ItemStack reloadItem = createItem(Material.REDSTONE_TORCH, NPCHirelingSystem.getLang().getRaw("admin_reload"));
-        inv.setItem(4, reloadItem);
+        inv.setItem(8, reloadItem);
+        
+        // Settings Button
+        ItemStack settingsItem = createItem(Material.COMPARATOR, NPCHirelingSystem.getLang().getRaw("admin_settings"));
+        inv.setItem(0, settingsItem);
 
         // List Hirelings
         List<HirelingNPC> allHirelings = npcManager.getAllHirelings();

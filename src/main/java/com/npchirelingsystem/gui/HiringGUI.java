@@ -22,9 +22,13 @@ public class HiringGUI {
         String clickHire = NPCHirelingSystem.getLang().getRaw("click_to_hire");
         String wageLore = NPCHirelingSystem.getLang().getRaw("wage_lore");
 
-        inv.setItem(2, createItem(Material.IRON_PICKAXE, minerName, wageLore.replace("%wage%", "10.0"), clickHire));
-        inv.setItem(4, createItem(Material.IRON_SWORD, guardName, wageLore.replace("%wage%", "15.0"), clickHire));
-        inv.setItem(6, createItem(Material.WHEAT, farmerName, wageLore.replace("%wage%", "8.0"), clickHire));
+        double minerWage = NPCHirelingSystem.getInstance().getConfig().getDouble("wages.miner", 10.0);
+        double guardWage = NPCHirelingSystem.getInstance().getConfig().getDouble("wages.guard", 15.0);
+        double farmerWage = NPCHirelingSystem.getInstance().getConfig().getDouble("wages.farmer", 8.0);
+
+        inv.setItem(2, createItem(Material.IRON_PICKAXE, minerName, wageLore.replace("%wage%", String.valueOf(minerWage)), clickHire));
+        inv.setItem(4, createItem(Material.IRON_SWORD, guardName, wageLore.replace("%wage%", String.valueOf(guardWage)), clickHire));
+        inv.setItem(6, createItem(Material.WHEAT, farmerName, wageLore.replace("%wage%", String.valueOf(farmerWage)), clickHire));
 
         player.openInventory(inv);
     }
