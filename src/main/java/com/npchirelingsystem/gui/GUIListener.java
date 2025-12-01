@@ -111,9 +111,12 @@ public class GUIListener implements Listener {
         if (item.getType() == Material.EMERALD) {
             HiringGUI.open(player);
         } else if (item.getType() == Material.BOOK) {
-            AdminGUI.open(player, npcManager); 
+            // Open list of hirelings (Not implemented yet, maybe just chat list or new GUI)
+            player.sendMessage("§eUse /hire to see your hirelings via chat for now.");
         } else if (item.getType() == Material.PAPER) {
             ContractGUI.open(player, contractManager);
+        } else if (item.getType() == Material.COMMAND_BLOCK) {
+            AdminGUI.open(player, npcManager);
         }
     }
     

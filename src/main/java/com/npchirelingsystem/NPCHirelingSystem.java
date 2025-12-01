@@ -29,6 +29,10 @@ public class NPCHirelingSystem extends JavaPlugin {
     public void onEnable() {
         instance = this;
         
+        // Register Traits
+        net.citizensnpcs.api.CitizensAPI.getTraitFactory().registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(com.npchirelingsystem.traits.HirelingTrait.class));
+        net.citizensnpcs.api.CitizensAPI.getTraitFactory().registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(com.npchirelingsystem.traits.QuestGiverTrait.class));
+        
         // Load config and language
         saveDefaultConfig();
         languageManager = new LanguageManager(this);
@@ -50,7 +54,7 @@ public class NPCHirelingSystem extends JavaPlugin {
         
         getServer().getPluginManager().registerEvents(new com.npchirelingsystem.gui.GUIListener(npcManager, contractManager), this);
         getServer().getPluginManager().registerEvents(new com.npchirelingsystem.listeners.PlayerListener(npcManager), this);
-        getServer().getPluginManager().registerEvents(new com.npchirelingsystem.listeners.NPCInteractionListener(npcManager), this);
+        // Removed NPCInteractionListener as Traits handle interaction now
         
         // Start wage task (every 60 seconds = 1200 ticks)
         new com.npchirelingsystem.tasks.WageTask(npcManager).runTaskTimer(this, 1200L, 1200L);
@@ -62,6 +66,10 @@ public class NPCHirelingSystem extends JavaPlugin {
         new com.npchirelingsystem.tasks.LootTask(npcManager, lootManager).runTaskTimer(this, 6000L, 6000L);
         
         getLogger().info("NPCHirelingSystem enabled! Using economy: " + economyProvider.getName());
+    }
+    
+    public com.npchirelingsystem.managers.ContractManager getContractManager() {
+        return contractManager;
     }
 
     @Override
@@ -98,7 +106,7 @@ public class NPCHirelingSystem extends JavaPlugin {
     public static EconomyProvider getEconomy() {
         return economyProvider;
     }
-    
+
     public static NPCHirelingSystem getInstance() {
         return instance;
     }

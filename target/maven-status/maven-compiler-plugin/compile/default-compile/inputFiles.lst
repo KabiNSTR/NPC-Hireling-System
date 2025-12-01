@@ -27,4 +27,6 @@ D:\project\NPC Hireling System\src\main\java\com\npchirelingsystem\NPCHirelingSy
 D:\project\NPC Hireling System\src\main\java\com\npchirelingsystem\tasks\JobTask.java
 D:\project\NPC Hireling System\src\main\java\com\npchirelingsystem\tasks\LootTask.java
 D:\project\NPC Hireling System\src\main\java\com\npchirelingsystem\tasks\WageTask.java
+D:\project\NPC Hireling System\src\main\java\com\npchirelingsystem\traits\HirelingTrait.java
+D:\project\NPC Hireling System\src\main\java\com\npchirelingsystem\traits\QuestGiverTrait.java
 D:\project\NPC Hireling System\src\main\java\com\npchirelingsystem\utils\LanguageManager.java

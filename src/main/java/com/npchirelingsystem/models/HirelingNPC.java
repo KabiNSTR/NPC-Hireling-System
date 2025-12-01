@@ -213,6 +213,12 @@ public class HirelingNPC {
         this.entityUuid = npc.getUniqueId();
         this.lastLocation = spawnLoc;
         
+        // Add Hireling Trait
+        if (!npc.hasTrait(com.npchirelingsystem.traits.HirelingTrait.class)) {
+            npc.addTrait(com.npchirelingsystem.traits.HirelingTrait.class);
+        }
+        npc.getTrait(com.npchirelingsystem.traits.HirelingTrait.class).setHireling(this);
+        
         equipNPC(npc);
     }
 

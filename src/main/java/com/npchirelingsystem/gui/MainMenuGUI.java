@@ -25,8 +25,14 @@ public class MainMenuGUI {
         inv.setItem(13, list);
 
         // Contracts
-        ItemStack contracts = createItem(Material.PAPER, "§6Contracts", "§7View available jobs", "§7Earn money!");
+        ItemStack contracts = createItem(Material.PAPER, "§6Contracts & Quests", "§7View available jobs", "§7Earn money!");
         inv.setItem(15, contracts);
+        
+        // Admin (if op)
+        if (player.hasPermission("npchirelingsystem.admin")) {
+            ItemStack admin = createItem(Material.COMMAND_BLOCK, "§cAdmin Panel", "§7Server settings & Management");
+            inv.setItem(26, admin);
+        }
 
         player.openInventory(inv);
     }

@@ -29,6 +29,7 @@ public class AdminNPCManager {
 
     public void createAdminNPC(Location loc, String name) {
         NPC npc = CitizensAPI.getNPCRegistry().createNPC(EntityType.VILLAGER, name);
+        npc.addTrait(com.npchirelingsystem.traits.QuestGiverTrait.class);
         npc.spawn(loc);
         
         adminNPCIds.add(npc.getId());
