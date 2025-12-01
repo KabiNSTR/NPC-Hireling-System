@@ -26,6 +26,13 @@ public class HirelingNPC {
     private Location lastLocation;
     private final Inventory inventory;
     private boolean isFollowing = false;
+    
+    // Upgrade System
+    private int level = 1;
+    private int xp = 0;
+    private int skillPoints = 0;
+    private int dropRateUpgrade = 0; // Each point = +5% chance
+    private int rareDropUpgrade = 0; // Each point = +1% rare chance
 
     public HirelingNPC(UUID ownerId, String name, String profession, double wage) {
         this.ownerId = ownerId;
@@ -59,6 +66,8 @@ public class HirelingNPC {
             "§7Name: " + name,
             "§7Profession: " + profession,
             "§7Wage: " + wage,
+            "§7Level: §a" + level,
+            "§7XP: §b" + xp + "/" + getNextLevelXp(),
             "§7Status: " + (isFollowing ? "Following" : "Stationary")
         ));
         info.setItemMeta(infoMeta);
@@ -72,6 +81,14 @@ public class HirelingNPC {
         follow.setItemMeta(followMeta);
         inventory.setItem(24, follow);
         
+        // Upgrade Button
+        ItemStack upgrade = new ItemStack(Material.EXPERIENCE_BOTTLE);
+        ItemMeta upgradeMeta = upgrade.getItemMeta();
+        upgradeMeta.setDisplayName("§bSkill Tree");
+        upgradeMeta.setLore(Arrays.asList("§7Click to open upgrades."));
+        upgrade.setItemMeta(upgradeMeta);
+        inventory.setItem(20, upgrade);
+        
         // Fire Button
         ItemStack fire = new ItemStack(Material.RED_WOOL);
         ItemMeta fireMeta = fire.getItemMeta();
@@ -80,6 +97,38 @@ public class HirelingNPC {
         fire.setItemMeta(fireMeta);
         inventory.setItem(26, fire);
     }
+    
+    public int getNextLevelXp() {
+        return level * 100;
+    }
+    
+    public void addXp(int amount) {
+        this.xp += amount;
+        if (this.xp >= getNextLevelXp()) {
+            this.xp -= getNextLevelXp();
+            this.level++;
+            this.skillPoints++;
+            Player owner = Bukkit.getPlayer(ownerId);
+            if (owner != null) owner.sendMessage("§aYour hireling " + name + " leveled up to " + level + "! (+1 Skill Point)");
+            setupMenu();
+        }
+    }
+    
+    public int getLevel() { return level; }
+    public int getSkillPoints() { return skillPoints; }
+    public boolean spendSkillPoint() {
+        if (skillPoints > 0) {
+            skillPoints--;
+            return true;
+        }
+        return false;
+    }
+    
+    public int getDropRateUpgrade() { return dropRateUpgrade; }
+    public int getRareDropUpgrade() { return rareDropUpgrade; }
+    
+    public void upgradeDropRate() { dropRateUpgrade++; }
+    public void upgradeRareDrop() { rareDropUpgrade++; }
     
     public void toggleFollow() {
         this.isFollowing = !this.isFollowing;

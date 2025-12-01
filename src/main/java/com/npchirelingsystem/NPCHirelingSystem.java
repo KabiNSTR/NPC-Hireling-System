@@ -20,6 +20,8 @@ public class NPCHirelingSystem extends JavaPlugin {
     private static NPCHirelingSystem instance;
     private static LanguageManager languageManager;
     private static com.npchirelingsystem.managers.LootManager lootManager;
+    private static com.npchirelingsystem.managers.QuestManager questManager;
+    private static com.npchirelingsystem.managers.AdminNPCManager adminNPCManager;
     private NPCManager npcManager;
     private com.npchirelingsystem.managers.ContractManager contractManager;
 
@@ -36,12 +38,14 @@ public class NPCHirelingSystem extends JavaPlugin {
         this.npcManager = new NPCManager(this);
         this.npcManager.loadAll();
         
+        questManager = new com.npchirelingsystem.managers.QuestManager(this);
+        adminNPCManager = new com.npchirelingsystem.managers.AdminNPCManager(this);
         this.contractManager = new com.npchirelingsystem.managers.ContractManager();
         lootManager = new com.npchirelingsystem.managers.LootManager(this);
         
         // Register commands and events here
         getCommand("hire").setExecutor(new HireCommand());
-        getCommand("npcadmin").setExecutor(new AdminCommand(this, npcManager));
+        getCommand("npcadmin").setExecutor(new AdminCommand(this, npcManager, adminNPCManager));
         getCommand("contracts").setExecutor(new com.npchirelingsystem.commands.ContractCommand(contractManager));
         
         getServer().getPluginManager().registerEvents(new com.npchirelingsystem.gui.GUIListener(npcManager, contractManager), this);
@@ -64,6 +68,9 @@ public class NPCHirelingSystem extends JavaPlugin {
     public void onDisable() {
         if (npcManager != null) {
             npcManager.saveAll();
+        }
+        if (adminNPCManager != null) {
+            adminNPCManager.despawnAll();
         }
         log.info("[%s] Disabled Version %s".formatted(getDescription().getName(), getDescription().getVersion()));
     }
@@ -102,5 +109,13 @@ public class NPCHirelingSystem extends JavaPlugin {
     
     public static com.npchirelingsystem.managers.LootManager getLootManager() {
         return lootManager;
+    }
+    
+    public static com.npchirelingsystem.managers.QuestManager getQuestManager() {
+        return questManager;
+    }
+    
+    public static com.npchirelingsystem.managers.AdminNPCManager getAdminNPCManager() {
+        return adminNPCManager;
     }
 }

@@ -33,7 +33,9 @@ public class GUIListener implements Listener {
         String settingsTitle = NPCHirelingSystem.getLang().getRaw("settings_gui_title");
         String wageTitle = NPCHirelingSystem.getLang().getRaw("wage_gui_title");
         
-        if (title.equals(hireTitle)) {
+        if (title.equals("NPC Hireling System")) {
+            handleMainMenuClick(event);
+        } else if (title.equals(hireTitle)) {
             handleHireClick(event);
         } else if (title.equals(adminTitle)) {
             handleAdminClick(event);
@@ -51,8 +53,67 @@ public class GUIListener implements Listener {
             handleLootItemEditClick(event);
         } else if (title.endsWith("'s Inventory")) {
             handleNPCMenuClick(event);
-        } else if (title.equals("Trade Contracts")) {
+        } else if (title.startsWith("Contracts: ")) {
             handleContractClick(event);
+        } else if (title.startsWith("Skill Tree: ")) {
+            handleSkillTreeClick(event);
+        }
+    }
+    
+    private void handleSkillTreeClick(InventoryClickEvent event) {
+        event.setCancelled(true);
+        if (event.getCurrentItem() == null) return;
+        Player player = (Player) event.getWhoClicked();
+        String title = event.getView().getTitle();
+        String npcName = title.replace("Skill Tree: ", "");
+        
+        HirelingNPC npc = null;
+        for (HirelingNPC n : npcManager.getAllHirelings()) {
+            if (n.getName().equals(npcName) && n.getOwnerId().equals(player.getUniqueId())) {
+                npc = n;
+                break;
+            }
+        }
+        
+        if (npc == null) {
+            player.closeInventory();
+            return;
+        }
+        
+        int slot = event.getSlot();
+        if (slot == 22) { // Back
+            player.openInventory(npc.getInventory());
+        } else if (slot == 11) { // Drop Rate
+            if (npc.spendSkillPoint()) {
+                npc.upgradeDropRate();
+                player.sendMessage("§aUpgraded Drop Rate!");
+                SkillTreeGUI.open(player, npc);
+            } else {
+                player.sendMessage("§cNot enough skill points!");
+            }
+        } else if (slot == 15) { // Rare Drop
+            if (npc.spendSkillPoint()) {
+                npc.upgradeRareDrop();
+                player.sendMessage("§aUpgraded Rare Drop Chance!");
+                SkillTreeGUI.open(player, npc);
+            } else {
+                player.sendMessage("§cNot enough skill points!");
+            }
+        }
+    }
+    
+    private void handleMainMenuClick(InventoryClickEvent event) {
+        event.setCancelled(true);
+        if (event.getCurrentItem() == null) return;
+        Player player = (Player) event.getWhoClicked();
+        ItemStack item = event.getCurrentItem();
+        
+        if (item.getType() == Material.EMERALD) {
+            HiringGUI.open(player);
+        } else if (item.getType() == Material.BOOK) {
+            AdminGUI.open(player, npcManager); 
+        } else if (item.getType() == Material.PAPER) {
+            ContractGUI.open(player, contractManager);
         }
     }
     
@@ -60,22 +121,30 @@ public class GUIListener implements Listener {
         event.setCancelled(true);
         if (event.getCurrentItem() == null) return;
         Player player = (Player) event.getWhoClicked();
+        String title = event.getView().getTitle();
+        String catName = title.replace("Contracts: ", "");
+        ContractManager.ContractCategory category = ContractManager.ContractCategory.valueOf(catName);
         
         int slot = event.getSlot();
-        List<Contract> contracts = contractManager.getContracts();
         
+        // Tabs
+        if (slot == 0) ContractGUI.open(player, contractManager, ContractManager.ContractCategory.GATHERING);
+        else if (slot == 1) ContractGUI.open(player, contractManager, ContractManager.ContractCategory.HUNTING);
+        else if (slot == 2) ContractGUI.open(player, contractManager, ContractManager.ContractCategory.LEGENDARY);
+        else if (slot == 44) MainMenuGUI.open(player);
+        
+        // Contracts
+        List<Contract> contracts = contractManager.getContracts(category);
         int index = -1;
-        if (slot == 11) index = 0;
-        else if (slot == 13) index = 1;
-        else if (slot == 15) index = 2;
+        if (slot == 19) index = 0;
+        else if (slot == 21) index = 1;
+        else if (slot == 23) index = 2;
+        else if (slot == 25) index = 3;
         
         if (index != -1 && index < contracts.size()) {
             Contract contract = contracts.get(index);
-            if (contractManager.completeContract(player, contract)) {
-                ContractGUI.open(player, contractManager); // Refresh
-            } else {
-                player.closeInventory();
-            }
+            contractManager.acceptContract(player, contract);
+            player.closeInventory();
         }
     }
 
@@ -277,6 +346,8 @@ public class GUIListener implements Listener {
                     targetNPC.toggleFollow();
                     player.sendMessage("§eNPC Follow Mode: " + (targetNPC.isFollowing() ? "§aEnabled" : "§cDisabled"));
                     player.openInventory(targetNPC.getInventory());
+                } else if (slot == 20) { // Skill Tree
+                    SkillTreeGUI.open(player, targetNPC);
                 } else if (slot == 26) { // Fire button
                     npcManager.fireNPC(targetNPC);
                     player.sendMessage(NPCHirelingSystem.getLang().get("fire_success"));

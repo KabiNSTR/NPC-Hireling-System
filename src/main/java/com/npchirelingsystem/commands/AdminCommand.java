@@ -4,6 +4,7 @@ import com.npchirelingsystem.NPCHirelingSystem;
 import com.npchirelingsystem.economy.EconomyProvider;
 import com.npchirelingsystem.gui.AdminGUI;
 import com.npchirelingsystem.managers.NPCManager;
+import com.npchirelingsystem.managers.AdminNPCManager;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -15,10 +16,12 @@ public class AdminCommand implements CommandExecutor {
 
     private final NPCHirelingSystem plugin;
     private final NPCManager npcManager;
+    private final AdminNPCManager adminNPCManager;
 
-    public AdminCommand(NPCHirelingSystem plugin, NPCManager npcManager) {
+    public AdminCommand(NPCHirelingSystem plugin, NPCManager npcManager, AdminNPCManager adminNPCManager) {
         this.plugin = plugin;
         this.npcManager = npcManager;
+        this.adminNPCManager = adminNPCManager;
     }
 
     @Override
@@ -36,6 +39,22 @@ public class AdminCommand implements CommandExecutor {
         
         if (args.length > 0 && args[0].equalsIgnoreCase("eco")) {
             handleEcoCommand(sender, args);
+            return true;
+        }
+        
+        if (args.length > 0 && args[0].equalsIgnoreCase("create")) {
+            if (!(sender instanceof Player)) {
+                sender.sendMessage("§cOnly players can use this command.");
+                return true;
+            }
+            if (args.length < 2) {
+                sender.sendMessage("§cUsage: /npcadmin create <name>");
+                return true;
+            }
+            String name = args[1];
+            Player player = (Player) sender;
+            adminNPCManager.createAdminNPC(player.getLocation(), name);
+            player.sendMessage("§aAdmin NPC '" + name + "' created at your location.");
             return true;
         }
 

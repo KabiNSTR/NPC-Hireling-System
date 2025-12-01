@@ -15,3 +15,9 @@
 - [x] Launch the Project
 
 - [x] Ensure Documentation is Complete
+
+## v2.6 Update Progress
+- [x] Implement Unified Main Menu
+- [x] Implement Advanced Contracts (Categories, Quest Logic)
+- [x] Implement Admin NPCs (Manager, Command)
+- [x] Implement Skill Tree System (GUI, Data, Logic)
