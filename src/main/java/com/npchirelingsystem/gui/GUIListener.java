@@ -21,12 +21,17 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.npchirelingsystem.managers.ContractManager;
+import com.npchirelingsystem.managers.ContractManager.Contract;
+
 public class GUIListener implements Listener {
 
     private final NPCManager npcManager;
+    private final ContractManager contractManager;
 
-    public GUIListener(NPCManager npcManager) {
+    public GUIListener(NPCManager npcManager, ContractManager contractManager) {
         this.npcManager = npcManager;
+        this.contractManager = contractManager;
     }
 
     @EventHandler
@@ -51,8 +56,34 @@ public class GUIListener implements Listener {
             handleLootJobSelect(event);
         } else if (title.endsWith("'s Inventory")) {
             handleNPCMenuClick(event);
+        } else if (title.equals("Trade Contracts")) {
+            handleContractClick(event);
         }
     }
+    
+    private void handleContractClick(InventoryClickEvent event) {
+        event.setCancelled(true);
+        if (event.getCurrentItem() == null) return;
+        Player player = (Player) event.getWhoClicked();
+        
+        int slot = event.getSlot();
+        List<Contract> contracts = contractManager.getContracts();
+        
+        int index = -1;
+        if (slot == 11) index = 0;
+        else if (slot == 13) index = 1;
+        else if (slot == 15) index = 2;
+        
+        if (index != -1 && index < contracts.size()) {
+            Contract contract = contracts.get(index);
+            if (contractManager.completeContract(player, contract)) {
+                ContractGUI.open(player, contractManager); // Refresh
+            } else {
+                player.closeInventory();
+            }
+        }
+    }
+
     
     private void handleSettingsClick(InventoryClickEvent event) {
         event.setCancelled(true);

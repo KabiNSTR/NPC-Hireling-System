@@ -20,6 +20,7 @@ public class NPCHirelingSystem extends JavaPlugin {
     private static NPCHirelingSystem instance;
     private static LanguageManager languageManager;
     private NPCManager npcManager;
+    private com.npchirelingsystem.managers.ContractManager contractManager;
 
     @Override
     public void onEnable() {
@@ -34,10 +35,14 @@ public class NPCHirelingSystem extends JavaPlugin {
         this.npcManager = new NPCManager(this);
         this.npcManager.loadAll();
         
+        this.contractManager = new com.npchirelingsystem.managers.ContractManager();
+        
         // Register commands and events here
         getCommand("hire").setExecutor(new HireCommand());
         getCommand("npcadmin").setExecutor(new AdminCommand(this, npcManager));
-        getServer().getPluginManager().registerEvents(new com.npchirelingsystem.gui.GUIListener(npcManager), this);
+        getCommand("contracts").setExecutor(new com.npchirelingsystem.commands.ContractCommand(contractManager));
+        
+        getServer().getPluginManager().registerEvents(new com.npchirelingsystem.gui.GUIListener(npcManager, contractManager), this);
         getServer().getPluginManager().registerEvents(new com.npchirelingsystem.listeners.PlayerListener(npcManager), this);
         getServer().getPluginManager().registerEvents(new com.npchirelingsystem.listeners.NPCInteractionListener(npcManager), this);
         

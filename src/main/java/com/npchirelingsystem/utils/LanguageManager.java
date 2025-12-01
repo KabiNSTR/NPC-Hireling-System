@@ -23,12 +23,33 @@ public class LanguageManager {
     public void loadMessages() {
         plugin.saveDefaultConfig();
         plugin.reloadConfig();
-        String lang = plugin.getConfig().getString("language", "en");
+        String lang = plugin.getConfig().getString("lang", "en");
         
-        File messagesFile = new File(plugin.getDataFolder(), "messages_" + lang + ".yml");
+        File localesDir = new File(plugin.getDataFolder(), "locales");
+        if (!localesDir.exists()) {
+            localesDir.mkdirs();
+        }
+        
+        File messagesFile = new File(localesDir, "messages_" + lang + ".yml");
         
         if (!messagesFile.exists()) {
-            plugin.saveResource("messages_" + lang + ".yml", false);
+            // Try to save from resource if it exists in jar
+            try {
+                plugin.saveResource("locales/messages_" + lang + ".yml", false);
+            } catch (IllegalArgumentException e) {
+                // If resource not found in jar at locales/ path, try root path and move it?
+                // Or just assume the user provided a valid lang.
+                // For now, let's try to save the default ones if they are missing.
+                if (lang.equals("en") || lang.equals("ru")) {
+                     // We need to handle the resource path correctly. 
+                     // In the JAR, they are at root. We want them in locales/ on disk.
+                     plugin.saveResource("messages_" + lang + ".yml", true); // Save to root first
+                     File rootFile = new File(plugin.getDataFolder(), "messages_" + lang + ".yml");
+                     if (rootFile.exists()) {
+                         rootFile.renameTo(messagesFile);
+                     }
+                }
+            }
         }
         
         messagesConfig = YamlConfiguration.loadConfiguration(messagesFile);
