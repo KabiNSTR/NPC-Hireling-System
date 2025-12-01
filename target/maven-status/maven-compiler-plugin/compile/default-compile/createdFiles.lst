@@ -1,0 +1,6 @@
+com\npchirelingsystem\commands\HireCommand.class
+com\npchirelingsystem\managers\NPCManager.class
+com\npchirelingsystem\gui\HiringGUI.class
+com\npchirelingsystem\NPCHirelingSystem.class
+com\npchirelingsystem\tasks\WageTask.class
+com\npchirelingsystem\models\HirelingNPC.class
