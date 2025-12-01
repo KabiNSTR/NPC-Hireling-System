@@ -1,5 +1,6 @@
 package com.npchirelingsystem.gui;
 
+import com.npchirelingsystem.NPCHirelingSystem;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -12,11 +13,18 @@ import java.util.Arrays;
 public class HiringGUI {
 
     public static void open(Player player) {
-        Inventory inv = Bukkit.createInventory(null, 9, "Hire an NPC");
+        String title = NPCHirelingSystem.getLang().getRaw("hire_gui_title");
+        Inventory inv = Bukkit.createInventory(null, 9, title);
 
-        inv.setItem(2, createItem(Material.IRON_PICKAXE, "§bMiner", "§7Wage: §e10.0/min", "§7Click to hire!"));
-        inv.setItem(4, createItem(Material.IRON_SWORD, "§cGuard", "§7Wage: §e15.0/min", "§7Click to hire!"));
-        inv.setItem(6, createItem(Material.WHEAT, "§aFarmer", "§7Wage: §e8.0/min", "§7Click to hire!"));
+        String minerName = NPCHirelingSystem.getLang().getRaw("npc_miner");
+        String guardName = NPCHirelingSystem.getLang().getRaw("npc_guard");
+        String farmerName = NPCHirelingSystem.getLang().getRaw("npc_farmer");
+        String clickHire = NPCHirelingSystem.getLang().getRaw("click_to_hire");
+        String wageLore = NPCHirelingSystem.getLang().getRaw("wage_lore");
+
+        inv.setItem(2, createItem(Material.IRON_PICKAXE, minerName, wageLore.replace("%wage%", "10.0"), clickHire));
+        inv.setItem(4, createItem(Material.IRON_SWORD, guardName, wageLore.replace("%wage%", "15.0"), clickHire));
+        inv.setItem(6, createItem(Material.WHEAT, farmerName, wageLore.replace("%wage%", "8.0"), clickHire));
 
         player.openInventory(inv);
     }

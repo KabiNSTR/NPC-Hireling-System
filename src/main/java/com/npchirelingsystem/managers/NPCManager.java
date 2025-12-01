@@ -18,7 +18,11 @@ public class NPCManager {
         npc.spawn(player.getLocation());
         
         hirelings.computeIfAbsent(player.getUniqueId(), k -> new ArrayList<>()).add(npc);
-        player.sendMessage("§aYou hired a " + profession + " for " + wage + " coins/min!");
+        
+        String msg = com.npchirelingsystem.NPCHirelingSystem.getLang().get("hired_message")
+                .replace("%profession%", profession)
+                .replace("%wage%", String.valueOf(wage));
+        player.sendMessage(msg);
     }
 
     public void fireNPC(HirelingNPC npc) {

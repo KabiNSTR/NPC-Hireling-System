@@ -1,10 +1,12 @@
 package com.npchirelingsystem;
 
+import com.npchirelingsystem.commands.AdminCommand;
 import com.npchirelingsystem.commands.HireCommand;
 import com.npchirelingsystem.economy.EconomyProvider;
 import com.npchirelingsystem.economy.InternalEconomyProvider;
 import com.npchirelingsystem.economy.VaultEconomyProvider;
 import com.npchirelingsystem.managers.NPCManager;
+import com.npchirelingsystem.utils.LanguageManager;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -16,11 +18,16 @@ public class NPCHirelingSystem extends JavaPlugin {
     private static final Logger log = Logger.getLogger("Minecraft");
     private static EconomyProvider economyProvider;
     private static NPCHirelingSystem instance;
+    private static LanguageManager languageManager;
     private NPCManager npcManager;
 
     @Override
     public void onEnable() {
         instance = this;
+        
+        // Load config and language
+        saveDefaultConfig();
+        languageManager = new LanguageManager(this);
         
         setupEconomy();
         
@@ -28,6 +35,7 @@ public class NPCHirelingSystem extends JavaPlugin {
         
         // Register commands and events here
         getCommand("hire").setExecutor(new HireCommand());
+        getCommand("npcadmin").setExecutor(new AdminCommand(this, npcManager));
         getServer().getPluginManager().registerEvents(new com.npchirelingsystem.gui.GUIListener(npcManager), this);
         
         // Start wage task (every 60 seconds = 1200 ticks)
@@ -39,6 +47,11 @@ public class NPCHirelingSystem extends JavaPlugin {
     @Override
     public void onDisable() {
         log.info("[%s] Disabled Version %s".formatted(getDescription().getName(), getDescription().getVersion()));
+    }
+    
+    public void reloadPlugin() {
+        reloadConfig();
+        languageManager.loadMessages();
     }
 
     private void setupEconomy() {
@@ -62,5 +75,9 @@ public class NPCHirelingSystem extends JavaPlugin {
     
     public static NPCHirelingSystem getInstance() {
         return instance;
+    }
+    
+    public static LanguageManager getLang() {
+        return languageManager;
     }
 }

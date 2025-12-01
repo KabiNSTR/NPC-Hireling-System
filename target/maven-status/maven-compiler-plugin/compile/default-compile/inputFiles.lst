@@ -1,10 +1,13 @@
+D:\project\NPC Hireling System\src\main\java\com\npchirelingsystem\commands\AdminCommand.java
 D:\project\NPC Hireling System\src\main\java\com\npchirelingsystem\commands\HireCommand.java
 D:\project\NPC Hireling System\src\main\java\com\npchirelingsystem\economy\EconomyProvider.java
 D:\project\NPC Hireling System\src\main\java\com\npchirelingsystem\economy\InternalEconomyProvider.java
 D:\project\NPC Hireling System\src\main\java\com\npchirelingsystem\economy\VaultEconomyProvider.java
+D:\project\NPC Hireling System\src\main\java\com\npchirelingsystem\gui\AdminGUI.java
 D:\project\NPC Hireling System\src\main\java\com\npchirelingsystem\gui\GUIListener.java
 D:\project\NPC Hireling System\src\main\java\com\npchirelingsystem\gui\HiringGUI.java
 D:\project\NPC Hireling System\src\main\java\com\npchirelingsystem\managers\NPCManager.java
 D:\project\NPC Hireling System\src\main\java\com\npchirelingsystem\models\HirelingNPC.java
 D:\project\NPC Hireling System\src\main\java\com\npchirelingsystem\NPCHirelingSystem.java
 D:\project\NPC Hireling System\src\main\java\com\npchirelingsystem\tasks\WageTask.java
+D:\project\NPC Hireling System\src\main\java\com\npchirelingsystem\utils\LanguageManager.java

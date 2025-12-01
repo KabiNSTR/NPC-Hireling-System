@@ -10,7 +10,12 @@ public class HireCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage("Only players can hire NPCs!");
+            sender.sendMessage(com.npchirelingsystem.NPCHirelingSystem.getLang().get("only_players"));
+            return true;
+        }
+        
+        if (!sender.hasPermission("npchirelingsystem.hire")) {
+            sender.sendMessage(com.npchirelingsystem.NPCHirelingSystem.getLang().get("no_permission"));
             return true;
         }
         

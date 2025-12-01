@@ -33,9 +33,14 @@ public class WageTask extends BukkitRunnable {
             double wage = npc.getWage();
             if (NPCHirelingSystem.getEconomy().has(owner.getUniqueId(), wage)) {
                 NPCHirelingSystem.getEconomy().withdraw(owner.getUniqueId(), wage);
-                owner.sendMessage("§ePaid " + wage + " coins to your " + npc.getProfession());
+                String msg = NPCHirelingSystem.getLang().get("payment_message")
+                        .replace("%wage%", String.valueOf(wage))
+                        .replace("%profession%", npc.getProfession());
+                owner.sendMessage(msg);
             } else {
-                owner.sendMessage("§cYou couldn't pay your " + npc.getProfession() + "! They left.");
+                String msg = NPCHirelingSystem.getLang().get("payment_fail")
+                        .replace("%profession%", npc.getProfession());
+                owner.sendMessage(msg);
                 npcManager.fireNPC(npc);
             }
         }
