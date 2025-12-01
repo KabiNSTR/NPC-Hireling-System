@@ -29,6 +29,7 @@ com\npchirelingsystem\managers\AdminNPCManager.class
 com\npchirelingsystem\traits\QuestGiverTrait.class
 com\npchirelingsystem\gui\GUIListener.class
 com\npchirelingsystem\utils\LanguageManager.class
+com\npchirelingsystem\managers\ContractManager$ContractRarity.class
 com\npchirelingsystem\gui\AdminGUI.class
 com\npchirelingsystem\listeners\NPCInteractionListener.class
 com\npchirelingsystem\managers\NPCManager.class

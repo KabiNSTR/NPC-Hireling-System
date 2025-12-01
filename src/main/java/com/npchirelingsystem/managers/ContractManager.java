@@ -2,6 +2,7 @@ package com.npchirelingsystem.managers;
 
 import com.npchirelingsystem.NPCHirelingSystem;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -17,16 +18,33 @@ import java.util.UUID;
 public class ContractManager {
 
     private final Map<ContractCategory, List<Contract>> contracts = new HashMap<>();
+    private final Map<UUID, Integer> playerReputation = new HashMap<>(); // 0 - 1000+
     private final Random random = new Random();
     private long lastRefresh = 0;
     private static final long REFRESH_COOLDOWN = 10 * 60 * 1000; // 10 minutes
 
     public enum ContractCategory {
-        GATHERING, HUNTING, LEGENDARY
+        GATHERING, HUNTING, EXPLORATION, BOSS
     }
 
     public enum ContractType {
-        ITEM_DELIVERY, MOB_KILL, LEGENDARY_DELIVERY
+        ITEM_DELIVERY, MOB_KILL, BIOME_EXPLORE, BOSS_KILL
+    }
+
+    public enum ContractRarity {
+        COMMON(ChatColor.GRAY, 1.0),
+        UNCOMMON(ChatColor.GREEN, 1.5),
+        RARE(ChatColor.BLUE, 2.5),
+        EPIC(ChatColor.DARK_PURPLE, 4.0),
+        LEGENDARY(ChatColor.GOLD, 8.0);
+
+        public final ChatColor color;
+        public final double multiplier;
+
+        ContractRarity(ChatColor color, double multiplier) {
+            this.color = color;
+            this.multiplier = multiplier;
+        }
     }
 
     public ContractManager() {
@@ -37,7 +55,7 @@ public class ContractManager {
         contracts.clear();
         for (ContractCategory cat : ContractCategory.values()) {
             List<Contract> list = new ArrayList<>();
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < 5; i++) { // 5 options per category
                 list.add(generateContract(cat));
             }
             contracts.put(cat, list);
@@ -52,30 +70,75 @@ public class ContractManager {
         return contracts.getOrDefault(category, new ArrayList<>());
     }
 
+    public int getReputation(Player player) {
+        return playerReputation.getOrDefault(player.getUniqueId(), 0);
+    }
+
+    public void addReputation(Player player, int amount) {
+        playerReputation.put(player.getUniqueId(), getReputation(player) + amount);
+    }
+
+    private ContractRarity rollRarity(int reputation) {
+        double roll = random.nextDouble() * 100;
+        // Reputation increases chance of better tiers
+        double bonus = reputation / 50.0; 
+
+        if (roll < 1 + bonus / 2) return ContractRarity.LEGENDARY;
+        if (roll < 5 + bonus) return ContractRarity.EPIC;
+        if (roll < 15 + bonus * 2) return ContractRarity.RARE;
+        if (roll < 40 + bonus * 3) return ContractRarity.UNCOMMON;
+        return ContractRarity.COMMON;
+    }
+
     private Contract generateContract(ContractCategory category) {
+        ContractRarity rarity = rollRarity(0); // Default base rarity, could pass player rep if generating per-player
+        // Since contracts are global currently, we use a base random. 
+        // Ideally, we'd generate per player, but for this system let's keep it global with random rarities.
+        rarity = rollRarity(random.nextInt(500)); // Simulate "average" reputation for global pool
+
         if (category == ContractCategory.GATHERING) {
-            Material[] items = {Material.COBBLESTONE, Material.COAL, Material.WHEAT, Material.OAK_LOG, Material.IRON_ORE, Material.GOLD_ORE, Material.DIAMOND, Material.EMERALD};
+            Material[] items = {Material.COBBLESTONE, Material.COAL, Material.WHEAT, Material.OAK_LOG, Material.IRON_ORE, Material.GOLD_ORE, Material.DIAMOND, Material.EMERALD, Material.OBSIDIAN, Material.BLAZE_ROD};
             Material mat = items[random.nextInt(items.length)];
-            int amount = 16 + random.nextInt(48);
-            if (mat == Material.DIAMOND || mat == Material.EMERALD) amount = 1 + random.nextInt(5);
             
-            double reward = amount * 5.0;
-            if (mat == Material.DIAMOND) reward *= 20;
-            if (mat == Material.EMERALD) reward *= 25;
-            if (mat == Material.GOLD_ORE) reward *= 5;
+            int baseAmount = 16;
+            if (mat == Material.DIAMOND || mat == Material.EMERALD || mat == Material.BLAZE_ROD) baseAmount = 2;
             
-            return new Contract(ContractType.ITEM_DELIVERY, NPCHirelingSystem.getLang().getRaw("contract_desc_gather")
-                    .replace("%amount%", String.valueOf(amount))
-                    .replace("%item%", mat.name()), mat, amount, reward);
+            int amount = (int) (baseAmount * rarity.multiplier * (0.8 + random.nextDouble() * 0.4));
+            double reward = amount * 5.0 * rarity.multiplier;
+            
+            return new Contract(ContractType.ITEM_DELIVERY, rarity, 
+                    "Gather " + amount + " " + mat.name().toLowerCase().replace("_", " "), 
+                    mat, amount, reward);
+
         } else if (category == ContractCategory.HUNTING) {
-            String[] mobs = {"Zombie", "Skeleton", "Spider", "Creeper", "Enderman"};
+            String[] mobs = {"Zombie", "Skeleton", "Spider", "Creeper", "Enderman", "Witch", "Blaze"};
             String mob = mobs[random.nextInt(mobs.length)];
-            int amount = 5 + random.nextInt(15);
-            return new Contract(ContractType.MOB_KILL, NPCHirelingSystem.getLang().getRaw("contract_desc_kill")
-                    .replace("%amount%", String.valueOf(amount))
-                    .replace("%mob%", mob), null, amount, amount * 25.0);
-        } else {
-            return new Contract(ContractType.LEGENDARY_DELIVERY, NPCHirelingSystem.getLang().getRaw("contract_desc_legendary"), Material.PAPER, 1, 1000.0 + random.nextInt(2000));
+            
+            int baseAmount = 5;
+            int amount = (int) (baseAmount * rarity.multiplier);
+            double reward = amount * 15.0 * rarity.multiplier;
+
+            return new Contract(ContractType.MOB_KILL, rarity,
+                    "Eliminate " + amount + " " + mob + "s",
+                    null, amount, reward);
+
+        } else if (category == ContractCategory.EXPLORATION) {
+            String[] biomes = {"Desert", "Forest", "Jungle", "Swamp", "Taiga", "Plains", "Savanna"};
+            String biome = biomes[random.nextInt(biomes.length)];
+            double reward = 200.0 * rarity.multiplier;
+
+            return new Contract(ContractType.BIOME_EXPLORE, rarity,
+                    "Scout the " + biome,
+                    Material.COMPASS, 1, reward);
+
+        } else { // BOSS
+            String[] bosses = {"Bandit King", "Corrupted Knight", "Shadow Assassin"};
+            String boss = bosses[random.nextInt(bosses.length)];
+            double reward = 1000.0 * rarity.multiplier;
+
+            return new Contract(ContractType.BOSS_KILL, rarity,
+                    "Defeat the " + boss,
+                    Material.WITHER_SKELETON_SKULL, 1, reward);
         }
     }
 
@@ -84,29 +147,32 @@ public class ContractManager {
             if (player.getInventory().containsAtLeast(new ItemStack(contract.material), contract.amount)) {
                 player.getInventory().removeItem(new ItemStack(contract.material, contract.amount));
                 NPCHirelingSystem.getEconomy().deposit(player.getUniqueId(), contract.reward);
-                player.sendMessage(NPCHirelingSystem.getLang().get("contract_completed").replace("%reward%", String.valueOf(contract.reward)));
+                addReputation(player, (int) (5 * contract.rarity.multiplier));
+                player.sendMessage(ChatColor.GREEN + "Contract Completed! Reward: " + ChatColor.GOLD + String.format("%.2f", contract.reward));
+                player.sendMessage(ChatColor.AQUA + "+Reputation");
             } else {
-                player.sendMessage(NPCHirelingSystem.getLang().get("contract_missing_items")
-                        .replace("%amount%", String.valueOf(contract.amount))
-                        .replace("%item%", contract.material.name()));
+                player.sendMessage(ChatColor.RED + "You need " + contract.amount + " " + contract.material.name() + ".");
             }
             return;
-        } else if (contract.type == ContractType.MOB_KILL || contract.type == ContractType.LEGENDARY_DELIVERY) {
+        } else {
+            // All other types are quests
             NPCHirelingSystem.getQuestManager().startQuest(player, contract);
         }
-        // player.sendMessage(NPCHirelingSystem.getLang().get("contract_accepted").replace("%description%", contract.description));
+        player.sendMessage(ChatColor.GREEN + "Contract Accepted: " + contract.description);
     }
 
     public static class Contract {
         public ContractType type;
+        public ContractRarity rarity;
         public String description;
-        public Material material; // For delivery
+        public Material material; // For delivery or icon
         public int amount;
         public double reward;
         public UUID id;
 
-        public Contract(ContractType type, String description, Material material, int amount, double reward) {
+        public Contract(ContractType type, ContractRarity rarity, String description, Material material, int amount, double reward) {
             this.type = type;
+            this.rarity = rarity;
             this.description = description;
             this.material = material;
             this.amount = amount;

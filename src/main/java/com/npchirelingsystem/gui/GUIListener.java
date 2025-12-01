@@ -170,22 +170,24 @@ public class GUIListener implements Listener {
         int slot = event.getSlot();
         
         // Tabs
-        if (slot == 0) ContractGUI.open(player, contractManager, ContractManager.ContractCategory.GATHERING);
-        else if (slot == 1) ContractGUI.open(player, contractManager, ContractManager.ContractCategory.HUNTING);
-        else if (slot == 2) ContractGUI.open(player, contractManager, ContractManager.ContractCategory.LEGENDARY);
+        if (slot == 10) ContractGUI.open(player, contractManager, ContractManager.ContractCategory.GATHERING);
+        else if (slot == 11) ContractGUI.open(player, contractManager, ContractManager.ContractCategory.HUNTING);
+        else if (slot == 12) ContractGUI.open(player, contractManager, ContractManager.ContractCategory.EXPLORATION);
+        else if (slot == 13) ContractGUI.open(player, contractManager, ContractManager.ContractCategory.BOSS);
         else if (slot == 40) {
             NPCHirelingSystem.getQuestManager().claimReward(player);
             player.closeInventory();
         }
-        else if (slot == 44) MainMenuGUI.open(player, false);
+        else if (slot == 49) MainMenuGUI.open(player, false);
         
         // Contracts
         List<Contract> contracts = contractManager.getContracts(category);
         int index = -1;
-        if (slot == 19) index = 0;
-        else if (slot == 21) index = 1;
-        else if (slot == 23) index = 2;
-        else if (slot == 25) index = 3;
+        if (slot == 29) index = 0;
+        else if (slot == 30) index = 1;
+        else if (slot == 31) index = 2;
+        else if (slot == 32) index = 3;
+        else if (slot == 33) index = 4;
         
         if (index != -1 && index < contracts.size()) {
             Contract contract = contracts.get(index);

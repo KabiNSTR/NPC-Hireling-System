@@ -5,6 +5,7 @@ import com.npchirelingsystem.managers.ContractManager;
 import com.npchirelingsystem.managers.ContractManager.Contract;
 import com.npchirelingsystem.managers.ContractManager.ContractCategory;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -17,16 +18,27 @@ import java.util.List;
 public class ContractGUI {
 
     public static void open(Player player, ContractManager manager, ContractCategory category) {
-        Inventory inv = Bukkit.createInventory(null, 45, NPCHirelingSystem.getLang().getRaw("contracts_prefix") + category.name());
+        Inventory inv = Bukkit.createInventory(null, 54, NPCHirelingSystem.getLang().getRaw("contracts_prefix") + category.name());
+
+        fillBorders(inv);
 
         // Category Tabs
-        inv.setItem(0, createTab(Material.IRON_PICKAXE, NPCHirelingSystem.getLang().getRaw("contract_tab_gathering"), category == ContractCategory.GATHERING));
-        inv.setItem(1, createTab(Material.IRON_SWORD, NPCHirelingSystem.getLang().getRaw("contract_tab_hunting"), category == ContractCategory.HUNTING));
-        inv.setItem(2, createTab(Material.NETHER_STAR, NPCHirelingSystem.getLang().getRaw("contract_tab_legendary"), category == ContractCategory.LEGENDARY));
+        inv.setItem(10, createTab(Material.IRON_PICKAXE, "Gathering", category == ContractCategory.GATHERING));
+        inv.setItem(11, createTab(Material.IRON_SWORD, "Hunting", category == ContractCategory.HUNTING));
+        inv.setItem(12, createTab(Material.COMPASS, "Exploration", category == ContractCategory.EXPLORATION));
+        inv.setItem(13, createTab(Material.WITHER_SKELETON_SKULL, "Bosses", category == ContractCategory.BOSS));
+
+        // Reputation Info
+        ItemStack rep = new ItemStack(Material.BOOK);
+        ItemMeta repMeta = rep.getItemMeta();
+        repMeta.setDisplayName(ChatColor.GOLD + "Reputation: " + manager.getReputation(player));
+        repMeta.setLore(Arrays.asList(ChatColor.GRAY + "Higher reputation unlocks", ChatColor.GRAY + "better contracts!"));
+        rep.setItemMeta(repMeta);
+        inv.setItem(4, rep);
 
         List<Contract> contracts = manager.getContracts(category);
         
-        int[] slots = {19, 21, 23, 25}; // 4 slots just in case, though we generate 3
+        int[] slots = {29, 30, 31, 32, 33}; 
         
         for (int i = 0; i < contracts.size(); i++) {
             if (i >= slots.length) break;
@@ -34,16 +46,19 @@ public class ContractGUI {
             Contract c = contracts.get(i);
             Material icon = c.material != null ? c.material : Material.PAPER;
             if (c.type == ContractManager.ContractType.MOB_KILL) icon = Material.ZOMBIE_HEAD;
+            if (c.type == ContractManager.ContractType.BOSS_KILL) icon = Material.DRAGON_HEAD;
             
             ItemStack item = new ItemStack(icon);
             ItemMeta meta = item.getItemMeta();
-            meta.setDisplayName(NPCHirelingSystem.getLang().getRaw("contract_item_name").replace("%type%", c.type.name()));
+            meta.setDisplayName(c.rarity.color + c.description);
             meta.setLore(Arrays.asList(
-                NPCHirelingSystem.getLang().getRaw("contract_lore_type").replace("%type%", c.type.name()),
-                NPCHirelingSystem.getLang().getRaw("contract_lore_desc").replace("%desc%", c.description),
-                NPCHirelingSystem.getLang().getRaw("contract_lore_reward").replace("%reward%", String.format("%.2f", c.reward)),
+                ChatColor.GRAY + "Type: " + ChatColor.WHITE + c.type.name(),
+                ChatColor.GRAY + "Rarity: " + c.rarity.color + c.rarity.name(),
                 "",
-                NPCHirelingSystem.getLang().getRaw("contract_lore_click")
+                ChatColor.GRAY + "Reward: " + ChatColor.GOLD + String.format("%.2f", c.reward) + " coins",
+                ChatColor.GRAY + "Reputation: " + ChatColor.AQUA + "+" + (int)(5 * c.rarity.multiplier),
+                "",
+                ChatColor.YELLOW + "Click to Accept"
             ));
             item.setItemMeta(meta);
             
@@ -55,7 +70,7 @@ public class ContractGUI {
         ItemMeta backMeta = back.getItemMeta();
         backMeta.setDisplayName(NPCHirelingSystem.getLang().getRaw("contract_back"));
         back.setItemMeta(backMeta);
-        inv.setItem(44, back);
+        inv.setItem(49, back);
 
         // Quest Status / Claim Reward
         if (NPCHirelingSystem.getQuestManager().isQuestCompleted(player)) {
@@ -91,5 +106,18 @@ public class ContractGUI {
         }
         item.setItemMeta(meta);
         return item;
+    }
+
+    private static void fillBorders(Inventory inv) {
+        ItemStack glass = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+        ItemMeta meta = glass.getItemMeta();
+        meta.setDisplayName(" ");
+        glass.setItemMeta(meta);
+
+        for (int i = 0; i < inv.getSize(); i++) {
+            if (i < 9 || i >= inv.getSize() - 9 || i % 9 == 0 || i % 9 == 8) {
+                inv.setItem(i, glass);
+            }
+        }
     }
 }

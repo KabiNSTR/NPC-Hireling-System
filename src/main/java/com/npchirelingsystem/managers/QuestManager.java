@@ -2,8 +2,10 @@ package com.npchirelingsystem.managers;
 
 import com.npchirelingsystem.NPCHirelingSystem;
 import com.npchirelingsystem.managers.ContractManager.Contract;
+import com.npchirelingsystem.managers.ContractManager.ContractType;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
+import net.citizensnpcs.api.trait.Trait;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -47,14 +49,18 @@ public class QuestManager implements Listener {
         ActiveQuest quest = new ActiveQuest(contract, targetLoc);
         activeQuests.put(player.getUniqueId(), quest);
 
-        player.sendMessage(NPCHirelingSystem.getLang().get("quest_go_to")
-                .replace("%x%", String.valueOf(targetLoc.getBlockX()))
-                .replace("%z%", String.valueOf(targetLoc.getBlockZ())));
+        if (contract.type == ContractType.BIOME_EXPLORE) {
+            player.sendMessage(ChatColor.GREEN + "Quest Started: Find a " + ChatColor.YELLOW + contract.description.replace("Scout the ", "") + ChatColor.GREEN + " biome!");
+        } else {
+            player.sendMessage(NPCHirelingSystem.getLang().get("quest_go_to")
+                    .replace("%x%", String.valueOf(targetLoc.getBlockX()))
+                    .replace("%z%", String.valueOf(targetLoc.getBlockZ())));
+        }
     }
 
     private Location generateRandomLocation(Location center) {
-        double x = center.getX() + (Math.random() * 200 - 100);
-        double z = center.getZ() + (Math.random() * 200 - 100);
+        double x = center.getX() + (Math.random() * 400 - 200);
+        double z = center.getZ() + (Math.random() * 400 - 200);
         Location loc = new Location(center.getWorld(), x, center.getWorld().getHighestBlockYAt((int)x, (int)z) + 1, z);
         return loc;
     }
@@ -68,12 +74,22 @@ public class QuestManager implements Listener {
                     if (p == null || !p.isOnline()) continue;
                     
                     ActiveQuest quest = entry.getValue();
-                    if (quest.spawned || quest.completed) continue;
+                    if (quest.completed) continue;
 
-                    if (p.getLocation().distance(quest.targetLoc) < 30) {
-                        spawnQuestMobs(quest);
-                        quest.spawned = true;
-                        p.sendMessage(ChatColor.YELLOW + "Targets spotted! Eliminate them!");
+                    if (quest.contract.type == ContractType.BIOME_EXPLORE) {
+                        String biomeName = p.getLocation().getBlock().getBiome().name();
+                        String targetBiome = quest.contract.description.replace("Scout the ", "").toUpperCase().replace(" ", "_");
+                        
+                        if (biomeName.contains(targetBiome)) {
+                            quest.completed = true;
+                            p.sendMessage(ChatColor.GOLD + "Biome Found! Contract Complete! Return to menu to claim reward.");
+                        }
+                    } else if (!quest.spawned) {
+                        if (p.getLocation().distance(quest.targetLoc) < 30) {
+                            spawnQuestMobs(quest);
+                            quest.spawned = true;
+                            p.sendMessage(ChatColor.YELLOW + "Targets spotted! Eliminate them!");
+                        }
                     }
                 }
             }
@@ -81,28 +97,50 @@ public class QuestManager implements Listener {
     }
 
     private void spawnQuestMobs(ActiveQuest quest) {
-        EntityType type = EntityType.ZOMBIE; // Default
-        if (quest.contract.type == ContractManager.ContractType.MOB_KILL) {
-            // Could map contract description to entity types
+        EntityType type = EntityType.ZOMBIE;
+        int count = 3;
+        String name = "Rogue Mercenary";
+        double health = 20.0;
+        double damage = 5.0;
+
+        if (quest.contract.type == ContractType.BOSS_KILL) {
+            type = EntityType.WITHER_SKELETON;
+            count = 1;
+            name = ChatColor.RED + "☠ " + quest.contract.description.replace("Defeat the ", "") + " ☠";
+            health = 100.0 * quest.contract.rarity.multiplier;
+            damage = 10.0 * quest.contract.rarity.multiplier;
+        } else {
+            // Scale normal mobs with rarity
+            count = (int) (3 * quest.contract.rarity.multiplier);
+            health = 20.0 * quest.contract.rarity.multiplier;
         }
 
-        for (int i = 0; i < 3; i++) { // Spawn 3 enemies
+        for (int i = 0; i < count; i++) {
             Location spawnLoc = quest.targetLoc.clone().add(Math.random()*6-3, 0, Math.random()*6-3);
             spawnLoc.setY(spawnLoc.getWorld().getHighestBlockYAt(spawnLoc) + 1);
             
-            NPC npc = CitizensAPI.getNPCRegistry().createNPC(type, "Rogue Mercenary");
+            NPC npc = CitizensAPI.getNPCRegistry().createNPC(type, name);
             npc.spawn(spawnLoc);
             npc.setProtected(false);
             
-            // Add Sentinel trait if available
-            if (CitizensAPI.getTraitFactory().getTrait("sentinel") != null) {
-                npc.addTrait(CitizensAPI.getTraitFactory().getTrait("sentinel"));
-                // We would configure sentinel here (set targets, etc)
-                // For now, we assume default sentinel or manual configuration isn't fully automated without the jar dependency
+            // Configure Sentinel if available
+            Trait sentinel = CitizensAPI.getTraitFactory().getTrait("sentinel");
+            if (sentinel != null) {
+                npc.addTrait(sentinel);
+                // We can't easily set Sentinel stats via API without casting to SentinelTrait which requires the jar
+                // But we can set Bukkit attributes
+            }
+            
+            if (npc.getEntity() instanceof org.bukkit.entity.LivingEntity) {
+                org.bukkit.entity.LivingEntity le = (org.bukkit.entity.LivingEntity) npc.getEntity();
+                le.getAttribute(org.bukkit.attribute.Attribute.GENERIC_MAX_HEALTH).setBaseValue(health);
+                le.getAttribute(org.bukkit.attribute.Attribute.GENERIC_ATTACK_DAMAGE).setBaseValue(damage);
+                le.setHealth(health);
             }
             
             quest.questMobIds.put(npc.getUniqueId(), true);
         }
+        quest.targetKillCount = count;
     }
 
     @EventHandler
@@ -119,7 +157,7 @@ public class QuestManager implements Listener {
                     
                     Player p = Bukkit.getPlayer(entry.getKey());
                     if (p != null) {
-                        p.sendMessage(ChatColor.GREEN + "Target eliminated! (" + quest.killCount + "/3)");
+                        p.sendMessage(ChatColor.GREEN + "Target eliminated! (" + quest.killCount + "/" + quest.targetKillCount + ")");
                         if (quest.questMobIds.isEmpty()) {
                             quest.completed = true;
                             p.sendMessage(ChatColor.GOLD + "Contract Complete! Return to the menu to claim your reward.");
@@ -144,7 +182,13 @@ public class QuestManager implements Listener {
         ActiveQuest quest = activeQuests.get(player.getUniqueId());
         if (quest != null && quest.completed) {
             NPCHirelingSystem.getEconomy().deposit(player.getUniqueId(), quest.contract.reward);
-            player.sendMessage(ChatColor.GOLD + "You received " + quest.contract.reward + " coins!");
+            
+            // Add Reputation
+            plugin.getContractManager().addReputation(player, (int) (10 * quest.contract.rarity.multiplier));
+            
+            player.sendMessage(ChatColor.GOLD + "You received " + String.format("%.2f", quest.contract.reward) + " coins!");
+            player.sendMessage(ChatColor.AQUA + "+Reputation");
+            
             activeQuests.remove(player.getUniqueId());
             cooldowns.put(player.getUniqueId(), System.currentTimeMillis() + COOLDOWN_TIME);
         }
@@ -160,6 +204,7 @@ public class QuestManager implements Listener {
         boolean spawned = false;
         boolean completed = false;
         int killCount = 0;
+        int targetKillCount = 0;
         Map<UUID, Boolean> questMobIds = new HashMap<>();
 
         public ActiveQuest(Contract contract, Location targetLoc) {
