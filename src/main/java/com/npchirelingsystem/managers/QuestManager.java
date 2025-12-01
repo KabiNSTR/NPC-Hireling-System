@@ -36,12 +36,12 @@ public class QuestManager implements Listener {
     public void startQuest(Player player, Contract contract) {
         if (isOnCooldown(player)) {
             long remaining = (cooldowns.get(player.getUniqueId()) - System.currentTimeMillis()) / 1000;
-            player.sendMessage(ChatColor.RED + "You must wait " + remaining + "s before starting another contract.");
+            player.sendMessage(ChatColor.RED + "Вы должны подождать " + remaining + "с перед началом нового контракта.");
             return;
         }
 
         if (activeQuests.containsKey(player.getUniqueId())) {
-            player.sendMessage(ChatColor.RED + "You already have an active contract!");
+            player.sendMessage(ChatColor.RED + "У вас уже есть активный контракт!");
             return;
         }
 
@@ -50,7 +50,8 @@ public class QuestManager implements Listener {
         activeQuests.put(player.getUniqueId(), quest);
 
         if (contract.type == ContractType.BIOME_EXPLORE) {
-            player.sendMessage(ChatColor.GREEN + "Quest Started: Find a " + ChatColor.YELLOW + contract.description.replace("Scout the ", "") + ChatColor.GREEN + " biome!");
+            // Use the Russian description directly as it now contains the biome name
+            player.sendMessage(ChatColor.GREEN + "Квест начат: " + contract.description);
         } else {
             player.sendMessage(NPCHirelingSystem.getLang().get("quest_go_to")
                     .replace("%x%", String.valueOf(targetLoc.getBlockX()))
@@ -78,17 +79,17 @@ public class QuestManager implements Listener {
 
                     if (quest.contract.type == ContractType.BIOME_EXPLORE) {
                         String biomeName = p.getLocation().getBlock().getBiome().name();
-                        String targetBiome = quest.contract.description.replace("Scout the ", "").toUpperCase().replace(" ", "_");
+                        String targetBiome = quest.contract.target.toUpperCase().replace(" ", "_");
                         
                         if (biomeName.contains(targetBiome)) {
                             quest.completed = true;
-                            p.sendMessage(ChatColor.GOLD + "Biome Found! Contract Complete! Return to menu to claim reward.");
+                            p.sendMessage(ChatColor.GOLD + "Биом найден! Контракт выполнен! Вернитесь в меню, чтобы забрать награду.");
                         }
                     } else if (!quest.spawned) {
                         if (p.getLocation().distance(quest.targetLoc) < 30) {
                             spawnQuestMobs(quest);
                             quest.spawned = true;
-                            p.sendMessage(ChatColor.YELLOW + "Targets spotted! Eliminate them!");
+                            p.sendMessage(ChatColor.YELLOW + "Цели обнаружены! Уничтожьте их!");
                         }
                     }
                 }
@@ -99,14 +100,19 @@ public class QuestManager implements Listener {
     private void spawnQuestMobs(ActiveQuest quest) {
         EntityType type = EntityType.ZOMBIE;
         int count = 3;
-        String name = "Rogue Mercenary";
+        String name = "Наемник-Отступник";
         double health = 20.0;
         double damage = 5.0;
 
         if (quest.contract.type == ContractType.BOSS_KILL) {
             type = EntityType.WITHER_SKELETON;
             count = 1;
-            name = ChatColor.RED + "☠ " + quest.contract.description.replace("Defeat the ", "") + " ☠";
+            String bossName = quest.contract.target;
+            if (bossName.equals("Bandit King")) bossName = "Король Бандитов";
+            else if (bossName.equals("Corrupted Knight")) bossName = "Порочный Рыцарь";
+            else if (bossName.equals("Shadow Assassin")) bossName = "Теневой Ассасин";
+
+            name = ChatColor.RED + "☠ " + bossName + " ☠";
             health = 100.0 * quest.contract.rarity.multiplier;
             damage = 10.0 * quest.contract.rarity.multiplier;
         } else {
@@ -157,10 +163,10 @@ public class QuestManager implements Listener {
                     
                     Player p = Bukkit.getPlayer(entry.getKey());
                     if (p != null) {
-                        p.sendMessage(ChatColor.GREEN + "Target eliminated! (" + quest.killCount + "/" + quest.targetKillCount + ")");
+                        p.sendMessage(ChatColor.GREEN + "Цель устранена! (" + quest.killCount + "/" + quest.targetKillCount + ")");
                         if (quest.questMobIds.isEmpty()) {
                             quest.completed = true;
-                            p.sendMessage(ChatColor.GOLD + "Contract Complete! Return to the menu to claim your reward.");
+                            p.sendMessage(ChatColor.GOLD + "Контракт выполнен! Вернитесь в меню, чтобы забрать награду.");
                         }
                     }
                     break;
@@ -186,8 +192,8 @@ public class QuestManager implements Listener {
             // Add Reputation
             plugin.getContractManager().addReputation(player, (int) (10 * quest.contract.rarity.multiplier));
             
-            player.sendMessage(ChatColor.GOLD + "You received " + String.format("%.2f", quest.contract.reward) + " coins!");
-            player.sendMessage(ChatColor.AQUA + "+Reputation");
+            player.sendMessage(ChatColor.GOLD + "Вы получили " + String.format("%.2f", quest.contract.reward) + " монет!");
+            player.sendMessage(ChatColor.AQUA + "+Репутация");
             
             activeQuests.remove(player.getUniqueId());
             cooldowns.put(player.getUniqueId(), System.currentTimeMillis() + COOLDOWN_TIME);

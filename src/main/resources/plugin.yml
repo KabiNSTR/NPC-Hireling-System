@@ -3,30 +3,30 @@ version: 3.3
 main: com.npchirelingsystem.NPCHirelingSystem
 api-version: 1.20
 authors: [KabiNSTR]
-description: A plugin for hiring and managing NPC workers.
+description: Плагин для найма и управления NPC-работниками.
 depend: [Citizens]
 softdepend: [Vault]
 
 commands:
   hire:
-    description: Main command for hiring NPCs
+    description: Основная команда для найма NPC
     usage: /hire <npc>
     permission: npchirelingsystem.hire
     aliases: [h]
   npcadmin:
-    description: Admin panel for managing NPCs
+    description: Админ-панель для управления NPC
     usage: /npcadmin [reload]
     permission: npchirelingsystem.admin
     aliases: [nadmin]
   contracts:
-    description: View available trade contracts
+    description: Просмотр доступных торговых контрактов
     usage: /contracts
     aliases: [jobs, contract]
 
 permissions:
   npchirelingsystem.hire:
-    description: Allows hiring NPCs
+    description: Позволяет нанимать NPC
     default: true
   npchirelingsystem.admin:
-    description: Allows access to admin panel and commands
+    description: Позволяет доступ к админ-панели и командам
     default: op

@@ -23,16 +23,16 @@ public class ContractGUI {
         fillBorders(inv);
 
         // Category Tabs
-        inv.setItem(10, createTab(Material.IRON_PICKAXE, "Gathering", category == ContractCategory.GATHERING));
-        inv.setItem(11, createTab(Material.IRON_SWORD, "Hunting", category == ContractCategory.HUNTING));
-        inv.setItem(12, createTab(Material.COMPASS, "Exploration", category == ContractCategory.EXPLORATION));
-        inv.setItem(13, createTab(Material.WITHER_SKELETON_SKULL, "Bosses", category == ContractCategory.BOSS));
+        inv.setItem(10, createTab(Material.IRON_PICKAXE, "Сбор", category == ContractCategory.GATHERING));
+        inv.setItem(11, createTab(Material.IRON_SWORD, "Охота", category == ContractCategory.HUNTING));
+        inv.setItem(12, createTab(Material.COMPASS, "Исследование", category == ContractCategory.EXPLORATION));
+        inv.setItem(13, createTab(Material.WITHER_SKELETON_SKULL, "Боссы", category == ContractCategory.BOSS));
 
         // Reputation Info
         ItemStack rep = new ItemStack(Material.BOOK);
         ItemMeta repMeta = rep.getItemMeta();
-        repMeta.setDisplayName(ChatColor.GOLD + "Reputation: " + manager.getReputation(player));
-        repMeta.setLore(Arrays.asList(ChatColor.GRAY + "Higher reputation unlocks", ChatColor.GRAY + "better contracts!"));
+        repMeta.setDisplayName(ChatColor.GOLD + "Репутация: " + manager.getReputation(player));
+        repMeta.setLore(Arrays.asList(ChatColor.GRAY + "Высокая репутация открывает", ChatColor.GRAY + "лучшие контракты!"));
         rep.setItemMeta(repMeta);
         inv.setItem(4, rep);
 
@@ -52,13 +52,13 @@ public class ContractGUI {
             ItemMeta meta = item.getItemMeta();
             meta.setDisplayName(c.rarity.color + c.description);
             meta.setLore(Arrays.asList(
-                ChatColor.GRAY + "Type: " + ChatColor.WHITE + c.type.name(),
-                ChatColor.GRAY + "Rarity: " + c.rarity.color + c.rarity.name(),
+                ChatColor.GRAY + "Тип: " + ChatColor.WHITE + c.type.name(),
+                ChatColor.GRAY + "Редкость: " + c.rarity.color + c.rarity.name(),
                 "",
-                ChatColor.GRAY + "Reward: " + ChatColor.GOLD + String.format("%.2f", c.reward) + " coins",
-                ChatColor.GRAY + "Reputation: " + ChatColor.AQUA + "+" + (int)(5 * c.rarity.multiplier),
+                ChatColor.GRAY + "Награда: " + ChatColor.GOLD + String.format("%.2f", c.reward) + " монет",
+                ChatColor.GRAY + "Репутация: " + ChatColor.AQUA + "+" + (int)(5 * c.rarity.multiplier),
                 "",
-                ChatColor.YELLOW + "Click to Accept"
+                ChatColor.YELLOW + "Нажмите, чтобы принять"
             ));
             item.setItemMeta(meta);
             
@@ -76,15 +76,15 @@ public class ContractGUI {
         if (NPCHirelingSystem.getQuestManager().isQuestCompleted(player)) {
             ItemStack claim = new ItemStack(Material.GOLD_BLOCK);
             ItemMeta meta = claim.getItemMeta();
-            meta.setDisplayName("§6§lClaim Reward");
-            meta.setLore(Arrays.asList("§7Click to claim your reward!"));
+            meta.setDisplayName("§6§lЗабрать награду");
+            meta.setLore(Arrays.asList("§7Нажмите, чтобы забрать награду!"));
             claim.setItemMeta(meta);
             inv.setItem(40, claim);
         } else if (NPCHirelingSystem.getQuestManager().hasActiveQuest(player)) {
             ItemStack status = new ItemStack(Material.COMPASS);
             ItemMeta meta = status.getItemMeta();
-            meta.setDisplayName("§eQuest in Progress");
-            meta.setLore(Arrays.asList("§7Check your chat for details."));
+            meta.setDisplayName("§eКвест выполняется");
+            meta.setLore(Arrays.asList("§7Проверьте чат для деталей."));
             status.setItemMeta(meta);
             inv.setItem(40, status);
         }

@@ -107,38 +107,47 @@ public class ContractManager {
             double reward = amount * 5.0 * rarity.multiplier;
             
             return new Contract(ContractType.ITEM_DELIVERY, rarity, 
-                    "Gather " + amount + " " + mat.name().toLowerCase().replace("_", " "), 
-                    mat, amount, reward);
+                    "Соберите " + amount + " " + mat.name().toLowerCase().replace("_", " "), 
+                    mat, amount, reward, mat.name());
 
         } else if (category == ContractCategory.HUNTING) {
             String[] mobs = {"Zombie", "Skeleton", "Spider", "Creeper", "Enderman", "Witch", "Blaze"};
-            String mob = mobs[random.nextInt(mobs.length)];
+            String[] mobNames = {"Зомби", "Скелетов", "Пауков", "Криперов", "Эндерменов", "Ведьм", "Ифритов"};
+            int idx = random.nextInt(mobs.length);
+            String mob = mobs[idx];
+            String mobName = mobNames[idx];
             
             int baseAmount = 5;
             int amount = (int) (baseAmount * rarity.multiplier);
             double reward = amount * 15.0 * rarity.multiplier;
 
             return new Contract(ContractType.MOB_KILL, rarity,
-                    "Eliminate " + amount + " " + mob + "s",
-                    null, amount, reward);
+                    "Уничтожьте " + amount + " " + mobName,
+                    null, amount, reward, mob);
 
         } else if (category == ContractCategory.EXPLORATION) {
             String[] biomes = {"Desert", "Forest", "Jungle", "Swamp", "Taiga", "Plains", "Savanna"};
-            String biome = biomes[random.nextInt(biomes.length)];
+            String[] biomeNames = {"Пустыню", "Лес", "Джунгли", "Болото", "Тайгу", "Равнины", "Саванну"};
+            int idx = random.nextInt(biomes.length);
+            String biome = biomes[idx];
+            String biomeName = biomeNames[idx];
             double reward = 200.0 * rarity.multiplier;
 
             return new Contract(ContractType.BIOME_EXPLORE, rarity,
-                    "Scout the " + biome,
-                    Material.COMPASS, 1, reward);
+                    "Разведайте " + biomeName,
+                    Material.COMPASS, 1, reward, biome);
 
         } else { // BOSS
             String[] bosses = {"Bandit King", "Corrupted Knight", "Shadow Assassin"};
-            String boss = bosses[random.nextInt(bosses.length)];
+            String[] bossNames = {"Короля Бандитов", "Порочного Рыцаря", "Теневого Ассасина"};
+            int idx = random.nextInt(bosses.length);
+            String boss = bosses[idx];
+            String bossName = bossNames[idx];
             double reward = 1000.0 * rarity.multiplier;
 
             return new Contract(ContractType.BOSS_KILL, rarity,
-                    "Defeat the " + boss,
-                    Material.WITHER_SKELETON_SKULL, 1, reward);
+                    "Победите " + bossName,
+                    Material.WITHER_SKELETON_SKULL, 1, reward, boss);
         }
     }
 
@@ -148,17 +157,17 @@ public class ContractManager {
                 player.getInventory().removeItem(new ItemStack(contract.material, contract.amount));
                 NPCHirelingSystem.getEconomy().deposit(player.getUniqueId(), contract.reward);
                 addReputation(player, (int) (5 * contract.rarity.multiplier));
-                player.sendMessage(ChatColor.GREEN + "Contract Completed! Reward: " + ChatColor.GOLD + String.format("%.2f", contract.reward));
-                player.sendMessage(ChatColor.AQUA + "+Reputation");
+                player.sendMessage(ChatColor.GREEN + "Контракт выполнен! Награда: " + ChatColor.GOLD + String.format("%.2f", contract.reward));
+                player.sendMessage(ChatColor.AQUA + "+Репутация");
             } else {
-                player.sendMessage(ChatColor.RED + "You need " + contract.amount + " " + contract.material.name() + ".");
+                player.sendMessage(ChatColor.RED + "Вам нужно " + contract.amount + " " + contract.material.name() + ".");
             }
             return;
         } else {
             // All other types are quests
             NPCHirelingSystem.getQuestManager().startQuest(player, contract);
         }
-        player.sendMessage(ChatColor.GREEN + "Contract Accepted: " + contract.description);
+        player.sendMessage(ChatColor.GREEN + "Контракт принят: " + contract.description);
     }
 
     public static class Contract {
@@ -169,8 +178,13 @@ public class ContractManager {
         public int amount;
         public double reward;
         public UUID id;
+        public String target; // New field for logic (Biome name, Mob name, etc.)
 
         public Contract(ContractType type, ContractRarity rarity, String description, Material material, int amount, double reward) {
+            this(type, rarity, description, material, amount, reward, null);
+        }
+
+        public Contract(ContractType type, ContractRarity rarity, String description, Material material, int amount, double reward, String target) {
             this.type = type;
             this.rarity = rarity;
             this.description = description;
@@ -178,6 +192,7 @@ public class ContractManager {
             this.amount = amount;
             this.reward = reward;
             this.id = UUID.randomUUID();
+            this.target = target;
         }
     }
 }
