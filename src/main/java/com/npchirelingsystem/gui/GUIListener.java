@@ -32,8 +32,9 @@ public class GUIListener implements Listener {
         String adminTitle = NPCHirelingSystem.getLang().getRaw("admin_gui_title");
         String settingsTitle = NPCHirelingSystem.getLang().getRaw("settings_gui_title");
         String wageTitle = NPCHirelingSystem.getLang().getRaw("wage_gui_title");
+        String mainMenuTitle = NPCHirelingSystem.getLang().getRaw("main_menu_title");
         
-        if (title.equals("NPC Hireling System")) {
+        if (title.equals(mainMenuTitle)) {
             handleMainMenuClick(event);
         } else if (title.equals(hireTitle)) {
             handleHireClick(event);
@@ -51,12 +52,19 @@ public class GUIListener implements Listener {
             }
         } else if (title.startsWith("Edit Loot: ")) {
             handleLootItemEditClick(event);
-        } else if (title.endsWith(NPCHirelingSystem.getLang().getRaw("npc_inventory_title_suffix"))) {
-            handleNPCMenuClick(event);
         } else if (title.startsWith(NPCHirelingSystem.getLang().getRaw("contracts_prefix"))) {
             handleContractClick(event);
         } else if (title.startsWith(NPCHirelingSystem.getLang().getRaw("skill_tree_prefix"))) {
             handleSkillTreeClick(event);
+        } else {
+            // Check if it's an NPC inventory by checking the inventory object directly
+            // This avoids localization issues with titles
+            for (HirelingNPC npc : npcManager.getAllHirelings()) {
+                if (event.getInventory().equals(npc.getInventory())) {
+                    handleNPCMenuClick(event);
+                    return;
+                }
+            }
         }
     }
     
