@@ -1,5 +1,6 @@
 package com.npchirelingsystem.managers;
 
+import com.npchirelingsystem.NPCHirelingSystem;
 import com.npchirelingsystem.models.HirelingNPC;
 import org.bukkit.entity.Player;
 
@@ -12,6 +13,11 @@ import java.util.UUID;
 public class NPCManager {
     
     private final Map<UUID, List<HirelingNPC>> hirelings = new HashMap<>();
+    private final DataManager dataManager;
+
+    public NPCManager(NPCHirelingSystem plugin) {
+        this.dataManager = new DataManager(plugin);
+    }
 
     public void hireNPC(Player player, String profession, double wage) {
         HirelingNPC npc = new HirelingNPC(player.getUniqueId(), player.getName() + "'s Hireling", profession, wage);
@@ -43,5 +49,31 @@ public class NPCManager {
     
     public List<HirelingNPC> getHirelings(UUID ownerId) {
         return hirelings.getOrDefault(ownerId, new ArrayList<>());
+    }
+    
+    public void saveAll() {
+        // Despawn all to update locations and remove entities
+        for (List<HirelingNPC> list : hirelings.values()) {
+            for (HirelingNPC npc : list) {
+                npc.despawn(); // This updates lastLocation inside the object
+            }
+        }
+        dataManager.saveHirelings(hirelings);
+    }
+    
+    public void loadAll() {
+        Map<UUID, List<HirelingNPC>> loaded = dataManager.loadHirelings();
+        this.hirelings.clear();
+        this.hirelings.putAll(loaded);
+        
+        // Respawn them
+        for (List<HirelingNPC> list : hirelings.values()) {
+            for (HirelingNPC npc : list) {
+                // Only spawn if we have a valid location
+                if (npc.getLastLocation() != null) {
+                    npc.spawn(npc.getLastLocation());
+                }
+            }
+        }
     }
 }

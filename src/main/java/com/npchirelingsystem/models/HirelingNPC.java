@@ -15,6 +15,7 @@ public class HirelingNPC {
     private final String profession;
     private final double wage;
     private UUID entityUuid;
+    private Location lastLocation;
 
     public HirelingNPC(UUID ownerId, String name, String profession, double wage) {
         this.ownerId = ownerId;
@@ -22,32 +23,56 @@ public class HirelingNPC {
         this.profession = profession;
         this.wage = wage;
     }
+    
+    public HirelingNPC(UUID ownerId, String name, String profession, double wage, Location lastLocation) {
+        this(ownerId, name, profession, wage);
+        this.lastLocation = lastLocation;
+    }
 
     public void spawn(Location location) {
         if (entityUuid != null && Bukkit.getEntity(entityUuid) != null) {
             return; // Already spawned
         }
+        
+        Location spawnLoc = (lastLocation != null) ? lastLocation : location;
+        if (spawnLoc == null) return;
 
-        LivingEntity entity = (LivingEntity) location.getWorld().spawnEntity(location, EntityType.VILLAGER);
+        LivingEntity entity = (LivingEntity) spawnLoc.getWorld().spawnEntity(spawnLoc, EntityType.VILLAGER);
         entity.setCustomName(name + " (" + profession + ")");
         entity.setCustomNameVisible(true);
         entity.setAI(true); // Can be set to false if we want them static
         
         if (entity instanceof Villager) {
-            ((Villager) entity).setProfession(Villager.Profession.valueOf(profession.toUpperCase()));
+            try {
+                ((Villager) entity).setProfession(Villager.Profession.valueOf(profession.toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                ((Villager) entity).setProfession(Villager.Profession.FARMER);
+            }
         }
 
         this.entityUuid = entity.getUniqueId();
+        this.lastLocation = spawnLoc;
     }
 
     public void despawn() {
         if (entityUuid != null) {
             var entity = Bukkit.getEntity(entityUuid);
             if (entity != null) {
+                this.lastLocation = entity.getLocation(); // Save location before removing
                 entity.remove();
             }
             entityUuid = null;
         }
+    }
+    
+    public Location getLastLocation() {
+        if (entityUuid != null) {
+            var entity = Bukkit.getEntity(entityUuid);
+            if (entity != null) {
+                return entity.getLocation();
+            }
+        }
+        return lastLocation;
     }
 
     public UUID getOwnerId() {

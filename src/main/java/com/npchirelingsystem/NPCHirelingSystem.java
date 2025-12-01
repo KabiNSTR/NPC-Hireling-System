@@ -31,12 +31,14 @@ public class NPCHirelingSystem extends JavaPlugin {
         
         setupEconomy();
         
-        this.npcManager = new NPCManager();
+        this.npcManager = new NPCManager(this);
+        this.npcManager.loadAll();
         
         // Register commands and events here
         getCommand("hire").setExecutor(new HireCommand());
         getCommand("npcadmin").setExecutor(new AdminCommand(this, npcManager));
         getServer().getPluginManager().registerEvents(new com.npchirelingsystem.gui.GUIListener(npcManager), this);
+        getServer().getPluginManager().registerEvents(new com.npchirelingsystem.listeners.PlayerListener(npcManager), this);
         
         // Start wage task (every 60 seconds = 1200 ticks)
         new com.npchirelingsystem.tasks.WageTask(npcManager).runTaskTimer(this, 1200L, 1200L);
@@ -46,6 +48,9 @@ public class NPCHirelingSystem extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (npcManager != null) {
+            npcManager.saveAll();
+        }
         log.info("[%s] Disabled Version %s".formatted(getDescription().getName(), getDescription().getVersion()));
     }
     
